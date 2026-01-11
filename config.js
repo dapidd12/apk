@@ -1,4 +1,3 @@
-
 // SHADOW STELLAR - Configuration File
 // Semua konfigurasi awal disimpan di sini
 
@@ -16,13 +15,6 @@ const SHADOW_STELLAR_CONFIG = (function() {
         maintenanceMessage: "SHADOW STELLAR sedang dalam pemeliharaan sistem.",
         maintenanceCountdown: null,
         
-        // Announcement
-        announcement: {
-            enabled: false,
-            message: "",
-            type: "info" // info, warning, error, success
-        },
-        
         // Theme Settings
         theme: {
             darkMode: true,
@@ -32,10 +24,10 @@ const SHADOW_STELLAR_CONFIG = (function() {
         
         // Security Settings
         security: {
-            developerCode: "SHADOW123", // Default developer code
+            developerCode: "SHADOW123",
             codeLength: 8,
             maxLoginAttempts: 3,
-            lockoutTime: 10, // minutes
+            lockoutTime: 10,
             
             // Browser Security
             defaultSandbox: "allow-scripts allow-forms allow-popups",
@@ -43,27 +35,11 @@ const SHADOW_STELLAR_CONFIG = (function() {
             disableWebGL: true
         },
         
-        // Session Settings
-        session: {
-            timeout: 30, // minutes
-            idleTimeout: 15 // minutes
-        },
-        
         // Feature Flags
         features: {
             maintenanceMode: true,
-            developerAccess: true,
             kioskMode: true,
-            browserSecurity: true,
-            statistics: true,
-            exportImport: true
-        },
-        
-        // Statistics (Initial)
-        statistics: {
-            totalClicks: 0,
-            totalWebsites: 4,
-            activeAdmins: 0
+            browserSecurity: true
         }
     };
 
@@ -78,11 +54,8 @@ const SHADOW_STELLAR_CONFIG = (function() {
             category: "portal",
             tags: ["main", "portal"],
             permissions: ["allow-scripts", "allow-forms"],
-            clickCount: 0,
-            isActive: true,
             maintenance: false,
-            maintenanceMessage: "",
-            createdAt: "2024-01-01"
+            maintenanceMessage: ""
         },
         {
             id: "dashboard",
@@ -93,11 +66,8 @@ const SHADOW_STELLAR_CONFIG = (function() {
             category: "tools",
             tags: ["tools", "dashboard"],
             permissions: ["allow-scripts", "allow-forms", "allow-popups"],
-            clickCount: 0,
-            isActive: true,
             maintenance: false,
-            maintenanceMessage: "",
-            createdAt: "2024-01-01"
+            maintenanceMessage: ""
         },
         {
             id: "data-center",
@@ -108,11 +78,8 @@ const SHADOW_STELLAR_CONFIG = (function() {
             category: "internal",
             tags: ["internal", "data"],
             permissions: ["allow-scripts"],
-            clickCount: 0,
-            isActive: true,
             maintenance: false,
-            maintenanceMessage: "",
-            createdAt: "2024-01-01"
+            maintenanceMessage: ""
         },
         {
             id: "media-center",
@@ -123,35 +90,14 @@ const SHADOW_STELLAR_CONFIG = (function() {
             category: "media",
             tags: ["media", "streaming"],
             permissions: ["allow-scripts", "allow-popups"],
-            clickCount: 0,
-            isActive: true,
             maintenance: false,
-            maintenanceMessage: "",
-            createdAt: "2024-01-01"
-        }
-    ];
-
-    // Admin Accounts (Read-only for display)
-    const ADMIN_ACCOUNTS = [
-        {
-            username: "admin",
-            role: "superadmin",
-            createdAt: "2024-01-01",
-            lastLogin: null
-        },
-        {
-            username: "supervisor",
-            role: "admin",
-            createdAt: "2024-01-01",
-            lastLogin: null
+            maintenanceMessage: ""
         }
     ];
 
     // Export configuration
     return {
         GLOBAL_CONFIG,
-        WEBSITES,
-        ADMIN_ACCOUNTS
+        WEBSITES
     };
 })();
-[file content end]

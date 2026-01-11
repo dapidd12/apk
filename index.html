@@ -1,10 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SHADOW STELLAR | Secure Internal Web Gateway</title>
+    
+    <!-- FontAwesome (FIXED: Ditambahkan link CSS) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- AOS Library -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
@@ -14,6 +16,19 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    
+    <!-- CSS Debug Script (non-intrusive) -->
+    <script>
+        // Check if CSS is loaded
+        setTimeout(function() {
+            const bodyColor = window.getComputedStyle(document.body).backgroundColor;
+            if (bodyColor === 'rgb(0, 0, 0)' || bodyColor === 'transparent') {
+                console.warn('SHADOW STELLAR: CSS mungkin tidak terload dengan benar');
+                // Non-intrusive indicator
+                document.title = "⚡ " + document.title;
+            }
+        }, 100);
+    </script>
 </head>
 <body>
     <!-- Video Background -->
@@ -35,7 +50,7 @@
     </div>
     
     <!-- Main Container -->
-    <div class="main-container">
+    <div class="main-container" id="main-container">
         <!-- Header Minimal -->
         <div class="main-header">
             <h1>SHADOW STELLAR</h1>
@@ -97,10 +112,6 @@
             <div class="stat-item">
                 <i class="fas fa-mouse-pointer"></i>
                 <span id="total-clicks">0</span> Klik
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-user-shield"></i>
-                <span id="active-admins">0</span> Admin
             </div>
         </div>
     </div>
@@ -205,30 +216,6 @@
                 <h3>Estimasi Selesai:</h3>
                 <div class="timer-display" id="timer-display">--:--:--</div>
             </div>
-            
-            <!-- Form Akses Developer -->
-            <div class="access-code-form" id="access-code-form">
-                <input type="text" 
-                       class="code-input" 
-                       id="access-code" 
-                       placeholder="Masukkan Kode Akses Developer"
-                       maxlength="8"
-                       autocomplete="off">
-                <button class="submit-code" id="submit-code">
-                    <i class="fas fa-key"></i> MASUK SEBAGAI DEVELOPER
-                </button>
-                <p class="attempts-info" id="attempts-info"></p>
-            </div>
-            
-            <!-- Access Log -->
-            <div class="access-log" id="access-log" style="display: none;">
-                <h4><i class="fas fa-history"></i> Log Akses Developer</h4>
-                <div class="log-entries" id="log-entries"></div>
-            </div>
-            
-            <p class="developer-link" id="show-access-form">
-                <i class="fas fa-user-shield"></i> Akses Developer?
-            </p>
         </div>
     </div>
     
@@ -279,15 +266,29 @@
         </div>
     </div>
 
-    <!-- External Scripts -->
+    <!-- External Scripts (LOADING ORDER FIXED) -->
+    <!-- 1. AOS Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    
+    <!-- 2. FontAwesome JS (dipakai jika diperlukan) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
-    <!-- Project Files -->
+    <!-- 3. Project Files -->
     <script src="config.js"></script>
     <script src="app.js"></script>
     
-    <!-- FontAwesome -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <!-- Global Error Handler -->
+    <script>
+        window.addEventListener('error', function(e) {
+            console.error('SHADOW STELLAR Error:', e.error);
+            const status = document.getElementById('status-message');
+            if (status) {
+                status.style.background = 'linear-gradient(45deg, #ff0000, #cc0000)';
+                status.textContent = 'SHADOW STELLAR: Error sistem, UI tetap berjalan';
+                status.style.display = 'block';
+                setTimeout(() => status.style.display = 'none', 3000);
+            }
+        });
+    </script>
 </body>
 </html>
-[file content end]
