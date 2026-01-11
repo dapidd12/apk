@@ -96,9 +96,9 @@ const SHADOW_STELLAR = (function() {
     function cacheElements() {
         const ids = [
             'status-message', 'loading-overlay', 'session-badge',
-            'session-username', 'logout-btn', 'website-search',
-            'clear-search', 'toggle-descriptions', 'export-config',
-            'import-config', 'toggle-mode', 'kiosk-mode',
+            'session-username', 'logout-btn', 'settings-btn',
+            'settings-menu', 'toggle-descriptions', 'toggle-mode',
+            'export-config', 'import-config', 'kiosk-mode',
             'horizontal-buttons', 'total-websites', 'total-clicks',
             'active-admins', 'admin-btn', 'browser-container',
             'browser-frame', 'browser-back', 'browser-forward',
@@ -127,11 +127,10 @@ const SHADOW_STELLAR = (function() {
             elements[id] = document.getElementById(id);
         });
         
-        // Category buttons
-        elements.categoryButtons = document.querySelectorAll('.category-btn');
-        
         // Tab buttons
-        elements.tabButtons = document.querySelectorAll('.tab-btn');
+        if (document.querySelectorAll('.tab-btn')) {
+            elements.tabButtons = document.querySelectorAll('.tab-btn');
+        }
     }
     
     // Load Data from Supabase
@@ -773,6 +772,8 @@ const SHADOW_STELLAR = (function() {
     // Show Status Message
     function showStatus(message, type = 'info') {
         const status = elements['status-message'];
+        if (!status) return;
+        
         const colors = {
             'success': 'linear-gradient(45deg, #008800, #00cc00)',
             'error': 'linear-gradient(45deg, #ff0000, #cc0000)',
@@ -828,20 +829,52 @@ const SHADOW_STELLAR = (function() {
         const savedShowDescriptions = localStorage.getItem('shadow_stellar_descriptions');
         const showDescriptions = savedShowDescriptions !== null ? savedShowDescriptions === 'true' : systemSettings.showDescriptions;
         
-        // Update button state
-        if (elements['toggle-descriptions']) {
-            elements['toggle-descriptions'].classList.toggle('active', showDescriptions);
-            elements['toggle-descriptions'].innerHTML = `<i class="fas fa-align-left"></i> Deskripsi ${showDescriptions ? '(ON)' : '(OFF)'}`;
-        }
+        // Update toggle switches in settings menu
+        updateSettingsMenuToggles();
         
         // Render website buttons
         renderWebsiteButtons();
         
-        // Update category filter
-        updateCategoryFilter();
-        
         // Update statistics
         updateStatistics();
+    }
+    
+    // Update Settings Menu Toggles
+    function updateSettingsMenuToggles() {
+        const showDescriptions = localStorage.getItem('shadow_stellar_descriptions') === 'true' || 
+                                systemSettings.showDescriptions;
+        
+        const darkMode = localStorage.getItem('shadow_stellar_darkmode') === 'true' || 
+                        systemSettings.darkMode;
+        
+        // Update toggle switches
+        const descToggle = document.querySelector('#toggle-descriptions .toggle-switch');
+        const modeToggle = document.querySelector('#toggle-mode .toggle-switch');
+        const kioskToggle = document.querySelector('#kiosk-mode .toggle-switch');
+        
+        if (descToggle) {
+            descToggle.classList.toggle('active', showDescriptions);
+        }
+        
+        if (modeToggle) {
+            modeToggle.classList.toggle('active', darkMode);
+        }
+        
+        if (kioskToggle) {
+            kioskToggle.classList.toggle('active', kioskMode);
+        }
+        
+        // Update mode button icon
+        const modeIcon = document.querySelector('#toggle-mode i');
+        if (modeIcon) {
+            modeIcon.className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        // Update kiosk button icon
+        const kioskIcon = document.querySelector('#kiosk-mode i');
+        if (kioskIcon) {
+            kioskIcon.className = kioskMode ? 'fas fa-lock' : 'fas fa-tv';
+        }
     }
     
     // Render Website Buttons
@@ -859,7 +892,6 @@ const SHADOW_STELLAR = (function() {
                 button.setAttribute('data-aos-delay', index * 100);
             }
             button.setAttribute('data-id', website.id);
-            button.setAttribute('data-category', website.category);
             
             const showDescriptions = localStorage.getItem('shadow_stellar_descriptions') === 'true' || 
                                     systemSettings.showDescriptions;
@@ -885,61 +917,31 @@ const SHADOW_STELLAR = (function() {
         }, 100);
     }
     
-    // Filter Websites by Search
-    function filterWebsites() {
-        const searchTerm = elements['website-search'].value.toLowerCase();
-        const buttons = document.querySelectorAll('.website-button');
-        
-        buttons.forEach(button => {
-            const name = button.querySelector('.button-title').textContent.toLowerCase();
-            const desc = button.querySelector('.button-desc').textContent.toLowerCase();
-            const match = name.includes(searchTerm) || desc.includes(searchTerm);
-            button.style.display = match ? 'flex' : 'none';
-        });
+    // Toggle Settings Menu
+    function toggleSettingsMenu() {
+        const menu = elements['settings-menu'];
+        if (menu) {
+            menu.classList.toggle('active');
+            
+            // Close menu when clicking outside
+            if (menu.classList.contains('active')) {
+                setTimeout(() => {
+                    document.addEventListener('click', closeSettingsMenuOnOutsideClick);
+                }, 10);
+            } else {
+                document.removeEventListener('click', closeSettingsMenuOnOutsideClick);
+            }
+        }
     }
     
-    // Clear Search
-    function clearSearch() {
-        elements['website-search'].value = '';
-        filterWebsites();
-    }
-    
-    // Filter by Category
-    function filterByCategory(category) {
-        // Update active category button
-        elements.categoryButtons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.category === category);
-        });
+    function closeSettingsMenuOnOutsideClick(e) {
+        const menu = elements['settings-menu'];
+        const settingsBtn = elements['settings-btn'];
         
-        const buttons = document.querySelectorAll('.website-button');
-        
-        buttons.forEach(button => {
-            const show = category === 'all' || button.dataset.category === category;
-            button.style.display = show ? 'flex' : 'none';
-        });
-    }
-    
-    // Update Category Filter
-    function updateCategoryFilter() {
-        // Count websites per category
-        const counts = {
-            all: websitesDB.length,
-            portal: websitesDB.filter(w => w.category === 'portal').length,
-            tools: websitesDB.filter(w => w.category === 'tools').length,
-            media: websitesDB.filter(w => w.category === 'media').length,
-            internal: websitesDB.filter(w => w.category === 'internal').length
-        };
-        
-        // Update button labels
-        elements.categoryButtons.forEach(btn => {
-            const category = btn.dataset.category;
-            const count = counts[category];
-            btn.textContent = category === 'all' ? 'Semua' : 
-                            category === 'portal' ? 'Portal' :
-                            category === 'tools' ? 'Tools' :
-                            category === 'media' ? 'Media' : 'Internal';
-            btn.textContent += ` (${count})`;
-        });
+        if (menu && !menu.contains(e.target) && !settingsBtn.contains(e.target)) {
+            menu.classList.remove('active');
+            document.removeEventListener('click', closeSettingsMenuOnOutsideClick);
+        }
     }
     
     // Toggle Descriptions
@@ -950,10 +952,13 @@ const SHADOW_STELLAR = (function() {
         
         localStorage.setItem('shadow_stellar_descriptions', newValue.toString());
         
-        const btn = elements['toggle-descriptions'];
-        btn.classList.toggle('active', newValue);
-        btn.innerHTML = `<i class="fas fa-align-left"></i> Deskripsi ${newValue ? '(ON)' : '(OFF)'}`;
+        // Update toggle switch
+        const descToggle = document.querySelector('#toggle-descriptions .toggle-switch');
+        if (descToggle) {
+            descToggle.classList.toggle('active', newValue);
+        }
         
+        // Update website buttons
         document.querySelectorAll('.button-desc').forEach(desc => {
             desc.classList.toggle('show', newValue);
         });
@@ -970,8 +975,17 @@ const SHADOW_STELLAR = (function() {
         localStorage.setItem('shadow_stellar_darkmode', newValue.toString());
         document.body.classList.toggle('darker-mode', newValue);
         
-        const btn = elements['toggle-mode'];
-        btn.innerHTML = `<i class="fas ${newValue ? 'fa-sun' : 'fa-moon'}"></i> Mode ${newValue ? 'Darker' : 'Dark'}`;
+        // Update toggle switch and icon
+        const modeToggle = document.querySelector('#toggle-mode .toggle-switch');
+        const modeIcon = document.querySelector('#toggle-mode i');
+        
+        if (modeToggle) {
+            modeToggle.classList.toggle('active', newValue);
+        }
+        
+        if (modeIcon) {
+            modeIcon.className = newValue ? 'fas fa-sun' : 'fas fa-moon';
+        }
         
         showStatus(`Mode ${newValue ? 'darker' : 'dark'} diaktifkan`, 'info');
     }
@@ -981,10 +995,9 @@ const SHADOW_STELLAR = (function() {
         kioskMode = !kioskMode;
         
         if (kioskMode) {
-            // Hide admin button and search
-            elements['admin-btn'].style.display = 'none';
-            if (elements['search-container']) {
-                elements['search-container'].style.display = 'none';
+            // Hide admin button
+            if (elements['admin-btn']) {
+                elements['admin-btn'].style.display = 'none';
             }
             
             // Disable right-click
@@ -1001,9 +1014,8 @@ const SHADOW_STELLAR = (function() {
             showStatus('Mode Kiosk diaktifkan - Admin dinonaktifkan', 'warning');
         } else {
             // Restore UI
-            elements['admin-btn'].style.display = 'flex';
-            if (elements['search-container']) {
-                elements['search-container'].style.display = 'block';
+            if (elements['admin-btn']) {
+                elements['admin-btn'].style.display = 'flex';
             }
             
             // Remove event listeners
@@ -1013,9 +1025,17 @@ const SHADOW_STELLAR = (function() {
             showStatus('Mode Kiosk dinonaktifkan', 'info');
         }
         
-        const btn = elements['kiosk-mode'];
-        btn.classList.toggle('active', kioskMode);
-        btn.innerHTML = `<i class="fas fa-${kioskMode ? 'lock' : 'tv'}"></i> Kiosk ${kioskMode ? '(ON)' : ''}`;
+        // Update toggle switch and icon
+        const kioskToggle = document.querySelector('#kiosk-mode .toggle-switch');
+        const kioskIcon = document.querySelector('#kiosk-mode i');
+        
+        if (kioskToggle) {
+            kioskToggle.classList.toggle('active', kioskMode);
+        }
+        
+        if (kioskIcon) {
+            kioskIcon.className = kioskMode ? 'fas fa-lock' : 'fas fa-tv';
+        }
     }
     
     function preventContextMenu(e) {
@@ -1087,7 +1107,9 @@ const SHADOW_STELLAR = (function() {
         const title = elements['browser-title'];
         
         // Update browser title
-        title.innerHTML = `<span class="url-display">${systemSettings.systemName} - ${website.name}</span>`;
+        if (title) {
+            title.innerHTML = `<span class="url-display">${systemSettings.systemName} - ${website.name}</span>`;
+        }
         
         // Build sandbox attributes
         let sandbox = systemSettings.defaultSandbox;
@@ -1104,8 +1126,12 @@ const SHADOW_STELLAR = (function() {
         
         // Show browser
         browser.style.display = 'flex';
-        elements['browser-info'].style.display = 'flex';
-        elements['frame-blocked'].style.display = 'none';
+        if (elements['browser-info']) {
+            elements['browser-info'].style.display = 'flex';
+        }
+        if (elements['frame-blocked']) {
+            elements['frame-blocked'].style.display = 'none';
+        }
         
         // Reset session timer
         resetSessionTimer();
@@ -1113,14 +1139,24 @@ const SHADOW_STELLAR = (function() {
     
     // Update Browser Info Panel
     function updateBrowserInfo(website) {
-        elements['info-name'].textContent = website.name;
-        elements['info-category'].textContent = website.category;
-        elements['info-permissions'].textContent = website.permissions.join(', ');
-        elements['info-clicks'].textContent = website.clickCount;
+        if (elements['info-name']) {
+            elements['info-name'].textContent = website.name;
+        }
+        if (elements['info-category']) {
+            elements['info-category'].textContent = website.category;
+        }
+        if (elements['info-permissions']) {
+            elements['info-permissions'].textContent = website.permissions.join(', ');
+        }
+        if (elements['info-clicks']) {
+            elements['info-clicks'].textContent = website.clickCount;
+        }
         
         const status = elements['info-status'];
-        status.className = 'status-indicator';
-        status.classList.add(website.maintenance ? 'maintenance' : 'active');
+        if (status) {
+            status.className = 'status-indicator';
+            status.classList.add(website.maintenance ? 'maintenance' : 'active');
+        }
     }
     
     // Iframe Load Handler
@@ -1139,14 +1175,18 @@ const SHADOW_STELLAR = (function() {
         } catch (error) {
             // X-Frame-Options or other restriction
             console.log('❌ Iframe blocked by X-Frame-Options');
-            elements['frame-blocked'].style.display = 'flex';
+            if (elements['frame-blocked']) {
+                elements['frame-blocked'].style.display = 'flex';
+            }
         }
     }
     
     // Iframe Error Handler
     function onIframeError() {
         hideLoading();
-        elements['frame-blocked'].style.display = 'flex';
+        if (elements['frame-blocked']) {
+            elements['frame-blocked'].style.display = 'flex';
+        }
         showStatus('Gagal memuat halaman website', 'error');
     }
     
@@ -1184,8 +1224,12 @@ const SHADOW_STELLAR = (function() {
     }
     
     function closeBrowser() {
-        elements['browser-container'].style.display = 'none';
-        elements['browser-frame'].src = 'about:blank';
+        if (elements['browser-container']) {
+            elements['browser-container'].style.display = 'none';
+        }
+        if (elements['browser-frame']) {
+            elements['browser-frame'].src = 'about:blank';
+        }
         currentWebsite = null;
     }
     
@@ -1198,27 +1242,46 @@ const SHADOW_STELLAR = (function() {
     // Open Security Settings
     function openSecuritySettings() {
         // Load current settings
-        elements['allow-scripts'].checked = systemSettings.defaultSandbox.includes('allow-scripts');
-        elements['allow-forms'].checked = systemSettings.defaultSandbox.includes('allow-forms');
-        elements['allow-popups'].checked = systemSettings.defaultSandbox.includes('allow-popups');
-        elements['allow-same-origin'].checked = systemSettings.defaultSandbox.includes('allow-same-origin');
-        elements['block-mixed-content'].checked = systemSettings.blockMixedContent;
-        elements['disable-webgl'].checked = systemSettings.disableWebGL;
+        if (elements['allow-scripts']) {
+            elements['allow-scripts'].checked = systemSettings.defaultSandbox.includes('allow-scripts');
+        }
+        if (elements['allow-forms']) {
+            elements['allow-forms'].checked = systemSettings.defaultSandbox.includes('allow-forms');
+        }
+        if (elements['allow-popups']) {
+            elements['allow-popups'].checked = systemSettings.defaultSandbox.includes('allow-popups');
+        }
+        if (elements['allow-same-origin']) {
+            elements['allow-same-origin'].checked = systemSettings.defaultSandbox.includes('allow-same-origin');
+        }
+        if (elements['block-mixed-content']) {
+            elements['block-mixed-content'].checked = systemSettings.blockMixedContent;
+        }
+        if (elements['disable-webgl']) {
+            elements['disable-webgl'].checked = systemSettings.disableWebGL;
+        }
         
-        elements['security-modal'].style.display = 'flex';
+        if (elements['security-modal']) {
+            elements['security-modal'].style.display = 'flex';
+        }
     }
     
     async function applySecuritySettings() {
         // Build sandbox string
         let sandbox = '';
-        if (elements['allow-scripts'].checked) sandbox += 'allow-scripts ';
-        if (elements['allow-forms'].checked) sandbox += 'allow-forms ';
-        if (elements['allow-popups'].checked) sandbox += 'allow-popups ';
-        if (elements['allow-same-origin'].checked) sandbox += 'allow-same-origin ';
+        if (elements['allow-scripts'] && elements['allow-scripts'].checked) sandbox += 'allow-scripts ';
+        if (elements['allow-forms'] && elements['allow-forms'].checked) sandbox += 'allow-forms ';
+        if (elements['allow-popups'] && elements['allow-popups'].checked) sandbox += 'allow-popups ';
+        if (elements['allow-same-origin'] && elements['allow-same-origin'].checked) sandbox += 'allow-same-origin ';
         
         systemSettings.defaultSandbox = sandbox.trim();
-        systemSettings.blockMixedContent = elements['block-mixed-content'].checked;
-        systemSettings.disableWebGL = elements['disable-webgl'].checked;
+        
+        if (elements['block-mixed-content']) {
+            systemSettings.blockMixedContent = elements['block-mixed-content'].checked;
+        }
+        if (elements['disable-webgl']) {
+            systemSettings.disableWebGL = elements['disable-webgl'].checked;
+        }
         
         // Save to Supabase
         if (supabase) {
@@ -1256,7 +1319,9 @@ const SHADOW_STELLAR = (function() {
     }
     
     function closeSecurityModal() {
-        elements['security-modal'].style.display = 'none';
+        if (elements['security-modal']) {
+            elements['security-modal'].style.display = 'none';
+        }
     }
     
     // Maintenance Mode Functions
@@ -1269,19 +1334,27 @@ const SHADOW_STELLAR = (function() {
     }
     
     function showMaintenanceScreen() {
-        elements['maintenance-mode'].style.display = 'flex';
-        elements['main-container'].style.display = 'none';
-        elements['admin-btn'].style.display = 'none';
+        if (elements['maintenance-mode']) {
+            elements['maintenance-mode'].style.display = 'flex';
+        }
+        if (elements['main-container']) {
+            elements['main-container'].style.display = 'none';
+        }
+        if (elements['admin-btn']) {
+            elements['admin-btn'].style.display = 'none';
+        }
         
         // Update maintenance message
-        elements['maintenance-message'].textContent = systemSettings.maintenanceMessage;
+        if (elements['maintenance-message']) {
+            elements['maintenance-message'].textContent = systemSettings.maintenanceMessage;
+        }
         
         // Show countdown if set
         if (systemSettings.maintenanceCountdown) {
             const endTime = new Date(systemSettings.maintenanceCountdown).getTime();
             const now = Date.now();
             
-            if (endTime > now) {
+            if (endTime > now && elements['countdown-timer'] && elements['timer-display']) {
                 elements['countdown-timer'].style.display = 'block';
                 startMaintenanceCountdown(endTime);
             }
@@ -1292,9 +1365,15 @@ const SHADOW_STELLAR = (function() {
     }
     
     function hideMaintenanceScreen() {
-        elements['maintenance-mode'].style.display = 'none';
-        elements['main-container'].style.display = 'block';
-        elements['admin-btn'].style.display = 'flex';
+        if (elements['maintenance-mode']) {
+            elements['maintenance-mode'].style.display = 'none';
+        }
+        if (elements['main-container']) {
+            elements['main-container'].style.display = 'block';
+        }
+        if (elements['admin-btn']) {
+            elements['admin-btn'].style.display = 'flex';
+        }
     }
     
     function startMaintenanceCountdown(endTime) {
@@ -1303,7 +1382,9 @@ const SHADOW_STELLAR = (function() {
             const remaining = endTime - now;
             
             if (remaining <= 0) {
-                elements['timer-display'].textContent = '00:00:00';
+                if (elements['timer-display']) {
+                    elements['timer-display'].textContent = '00:00:00';
+                }
                 return;
             }
             
@@ -1311,10 +1392,12 @@ const SHADOW_STELLAR = (function() {
             const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
             
-            elements['timer-display'].textContent = 
-                `${hours.toString().padStart(2, '0')}:` +
-                `${minutes.toString().padStart(2, '0')}:` +
-                `${seconds.toString().padStart(2, '0')}`;
+            if (elements['timer-display']) {
+                elements['timer-display'].textContent = 
+                    `${hours.toString().padStart(2, '0')}:` +
+                    `${minutes.toString().padStart(2, '0')}:` +
+                    `${seconds.toString().padStart(2, '0')}`;
+            }
             
             setTimeout(updateTimer, 1000);
         }
@@ -1323,19 +1406,27 @@ const SHADOW_STELLAR = (function() {
     }
     
     function showAccessForm() {
-        elements['access-code-form'].style.display = 'block';
-        elements['access-code'].focus();
+        if (elements['access-code-form']) {
+            elements['access-code-form'].style.display = 'block';
+        }
+        if (elements['access-code']) {
+            elements['access-code'].focus();
+        }
         updateAttemptsInfo();
     }
     
     function updateAttemptsInfo() {
-        const remaining = systemSettings.maxLoginAttempts - loginAttempts;
-        elements['attempts-info'].textContent = 
-            `Sisa percobaan: ${remaining} dari ${systemSettings.maxLoginAttempts}`;
-        elements['attempts-info'].style.color = remaining <= 1 ? '#ff0000' : '#ff9900';
+        if (elements['attempts-info']) {
+            const remaining = systemSettings.maxLoginAttempts - loginAttempts;
+            elements['attempts-info'].textContent = 
+                `Sisa percobaan: ${remaining} dari ${systemSettings.maxLoginAttempts}`;
+            elements['attempts-info'].style.color = remaining <= 1 ? '#ff0000' : '#ff9900';
+        }
     }
     
     async function submitAccessCode() {
+        if (!elements['access-code']) return;
+        
         const inputCode = elements['access-code'].value.trim().toUpperCase();
         
         if (!inputCode) {
@@ -1378,12 +1469,20 @@ const SHADOW_STELLAR = (function() {
             if (loginAttempts >= systemSettings.maxLoginAttempts) {
                 // Lockout
                 showStatus(`Terlalu banyak percobaan! Sistem terkunci ${systemSettings.lockoutTime} menit.`, 'error');
-                elements['access-code'].disabled = true;
-                elements['submit-code'].disabled = true;
+                if (elements['access-code']) {
+                    elements['access-code'].disabled = true;
+                }
+                if (elements['submit-code']) {
+                    elements['submit-code'].disabled = true;
+                }
                 
                 setTimeout(() => {
-                    elements['access-code'].disabled = false;
-                    elements['submit-code'].disabled = false;
+                    if (elements['access-code']) {
+                        elements['access-code'].disabled = false;
+                    }
+                    if (elements['submit-code']) {
+                        elements['submit-code'].disabled = false;
+                    }
                     loginAttempts = 0;
                     updateAttemptsInfo();
                     showStatus('Sistem dibuka kembali', 'info');
@@ -1393,15 +1492,21 @@ const SHADOW_STELLAR = (function() {
                 showStatus(`Kode salah! Sisa percobaan: ${remaining}`, 'error');
             }
             
-            elements['access-code'].value = '';
-            elements['access-code'].focus();
+            if (elements['access-code']) {
+                elements['access-code'].value = '';
+                elements['access-code'].focus();
+            }
             updateAttemptsInfo();
         }
     }
     
     function hideAccessForm() {
-        elements['access-code-form'].style.display = 'none';
-        elements['access-code'].value = '';
+        if (elements['access-code-form']) {
+            elements['access-code-form'].style.display = 'none';
+        }
+        if (elements['access-code']) {
+            elements['access-code'].value = '';
+        }
         loginAttempts = 0;
         updateAttemptsInfo();
     }
@@ -1456,7 +1561,9 @@ const SHADOW_STELLAR = (function() {
             });
             
             // Show log if there are entries
-            elements['access-log'].style.display = logs.length > 0 ? 'block' : 'none';
+            if (elements['access-log']) {
+                elements['access-log'].style.display = logs.length > 0 ? 'block' : 'none';
+            }
         } catch (error) {
             console.error('❌ Error updating access log:', error);
         }
@@ -1493,9 +1600,11 @@ const SHADOW_STELLAR = (function() {
     async function handleLogin(e) {
         e.preventDefault();
         
+        if (!elements['login-username'] || !elements['login-password']) return;
+        
         const username = elements['login-username'].value.trim();
         const password = elements['login-password'].value.trim();
-        const rememberMe = elements['remember-me'].checked;
+        const rememberMe = elements['remember-me'] ? elements['remember-me'].checked : false;
         
         if (!username || !password) {
             showStatus('Username dan password harus diisi', 'error');
@@ -1507,7 +1616,9 @@ const SHADOW_STELLAR = (function() {
         if (elements['login-delay-info']) {
             elements['login-delay-info'].textContent = `Memverifikasi... (${delay/1000}s)`;
         }
-        elements['login-submit'].disabled = true;
+        if (elements['login-submit']) {
+            elements['login-submit'].disabled = true;
+        }
         
         await new Promise(resolve => setTimeout(resolve, delay));
         
@@ -1585,21 +1696,29 @@ const SHADOW_STELLAR = (function() {
         } else {
             // Login failed
             loginAttempts++;
-            elements['login-password'].value = '';
+            if (elements['login-password']) {
+                elements['login-password'].value = '';
+            }
             
             const remaining = systemSettings.maxLoginAttempts - loginAttempts;
             if (remaining <= 0) {
                 showStatus(`Akun terkunci! Tunggu ${systemSettings.lockoutTime} menit.`, 'error');
-                elements['login-submit'].disabled = true;
+                if (elements['login-submit']) {
+                    elements['login-submit'].disabled = true;
+                }
                 
                 setTimeout(() => {
                     loginAttempts = 0;
-                    elements['login-submit'].disabled = false;
+                    if (elements['login-submit']) {
+                        elements['login-submit'].disabled = false;
+                    }
                     showStatus('Silakan coba login kembali', 'info');
                 }, systemSettings.lockoutTime * 60 * 1000);
             } else {
                 showStatus(`Login gagal! Sisa percobaan: ${remaining}`, 'error');
-                elements['login-submit'].disabled = false;
+                if (elements['login-submit']) {
+                    elements['login-submit'].disabled = false;
+                }
             }
         }
         
@@ -1695,23 +1814,35 @@ const SHADOW_STELLAR = (function() {
         const remembered = localStorage.getItem('shadow_stellar_remembered_user');
         if (remembered && elements['login-username']) {
             elements['login-username'].value = remembered;
-            elements['remember-me'].checked = true;
-            elements['login-password'].focus();
+            if (elements['remember-me']) {
+                elements['remember-me'].checked = true;
+            }
+            if (elements['login-password']) {
+                elements['login-password'].focus();
+            }
         }
         
-        elements['login-modal'].style.display = 'flex';
-        elements['login-username'].focus();
+        if (elements['login-modal']) {
+            elements['login-modal'].style.display = 'flex';
+        }
+        if (elements['login-username']) {
+            elements['login-username'].focus();
+        }
     }
     
     function closeLogin() {
-        elements['login-modal'].style.display = 'none';
+        if (elements['login-modal']) {
+            elements['login-modal'].style.display = 'none';
+        }
         if (elements['login-form']) {
             elements['login-form'].reset();
         }
         if (elements['login-delay-info']) {
             elements['login-delay-info'].textContent = '';
         }
-        elements['login-submit'].disabled = false;
+        if (elements['login-submit']) {
+            elements['login-submit'].disabled = false;
+        }
     }
     
     function openAdminPanel() {
@@ -1724,7 +1855,9 @@ const SHADOW_STELLAR = (function() {
         switchAdminTab('websites');
         
         // Show panel
-        elements['admin-modal'].style.display = 'flex';
+        if (elements['admin-modal']) {
+            elements['admin-modal'].style.display = 'flex';
+        }
         
         // Log admin activity to localStorage only
         if (currentSession && !statistics.adminActivity[currentSession.username]) {
@@ -1742,14 +1875,18 @@ const SHADOW_STELLAR = (function() {
     }
     
     function closeAdminPanel() {
-        elements['admin-modal'].style.display = 'none';
+        if (elements['admin-modal']) {
+            elements['admin-modal'].style.display = 'none';
+        }
     }
     
     function switchAdminTab(tabName) {
         // Update active tab button
-        elements.tabButtons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.tab === tabName);
-        });
+        if (elements.tabButtons) {
+            elements.tabButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabName);
+            });
+        }
         
         // Load tab content
         let content = '';
@@ -2390,11 +2527,11 @@ const SHADOW_STELLAR = (function() {
     
     // Admin Functions
     async function addWebsiteFromAdmin() {
-        const name = document.getElementById('web-name').value.trim();
-        const url = document.getElementById('web-url').value.trim();
-        const icon = document.getElementById('web-icon').value.trim();
-        const category = document.getElementById('web-category').value;
-        const description = document.getElementById('web-description').value.trim();
+        const name = document.getElementById('web-name') ? document.getElementById('web-name').value.trim() : '';
+        const url = document.getElementById('web-url') ? document.getElementById('web-url').value.trim() : '';
+        const icon = document.getElementById('web-icon') ? document.getElementById('web-icon').value.trim() : '';
+        const category = document.getElementById('web-category') ? document.getElementById('web-category').value : 'portal';
+        const description = document.getElementById('web-description') ? document.getElementById('web-description').value.trim() : '';
         
         if (!name || !url) {
             showStatus('Nama dan URL harus diisi!', 'error');
@@ -2408,10 +2545,15 @@ const SHADOW_STELLAR = (function() {
         
         // Build permissions array
         const permissions = [];
-        if (document.getElementById('perm-scripts').checked) permissions.push('allow-scripts');
-        if (document.getElementById('perm-forms').checked) permissions.push('allow-forms');
-        if (document.getElementById('perm-popups').checked) permissions.push('allow-popups');
-        if (document.getElementById('perm-same-origin').checked) permissions.push('allow-same-origin');
+        const scripts = document.getElementById('perm-scripts');
+        const forms = document.getElementById('perm-forms');
+        const popups = document.getElementById('perm-popups');
+        const sameOrigin = document.getElementById('perm-same-origin');
+        
+        if (scripts && scripts.checked) permissions.push('allow-scripts');
+        if (forms && forms.checked) permissions.push('allow-forms');
+        if (popups && popups.checked) permissions.push('allow-popups');
+        if (sameOrigin && sameOrigin.checked) permissions.push('allow-same-origin');
         
         const newWebsite = {
             id: `temp-${Date.now()}`,
@@ -2445,10 +2587,15 @@ const SHADOW_STELLAR = (function() {
         renderUI();
         
         // Reset form
-        document.getElementById('web-name').value = '';
-        document.getElementById('web-url').value = '';
-        document.getElementById('web-icon').value = 'fas fa-globe';
-        document.getElementById('web-description').value = '';
+        const nameInput = document.getElementById('web-name');
+        const urlInput = document.getElementById('web-url');
+        const iconInput = document.getElementById('web-icon');
+        const descInput = document.getElementById('web-description');
+        
+        if (nameInput) nameInput.value = '';
+        if (urlInput) urlInput.value = '';
+        if (iconInput) iconInput.value = 'fas fa-globe';
+        if (descInput) descInput.value = '';
         
         showStatus(`Website "${name}" berhasil ditambahkan!`, 'success');
         
@@ -2472,22 +2619,35 @@ const SHADOW_STELLAR = (function() {
         if (!website) return;
         
         // Fill form with website data
-        document.getElementById('web-name').value = website.name;
-        document.getElementById('web-url').value = website.url;
-        document.getElementById('web-icon').value = website.icon;
-        document.getElementById('web-category').value = website.category;
-        document.getElementById('web-description').value = website.description;
+        const nameInput = document.getElementById('web-name');
+        const urlInput = document.getElementById('web-url');
+        const iconInput = document.getElementById('web-icon');
+        const categoryInput = document.getElementById('web-category');
+        const descInput = document.getElementById('web-description');
+        
+        if (nameInput) nameInput.value = website.name;
+        if (urlInput) urlInput.value = website.url;
+        if (iconInput) iconInput.value = website.icon;
+        if (categoryInput) categoryInput.value = website.category;
+        if (descInput) descInput.value = website.description;
         
         // Set permissions
-        document.getElementById('perm-scripts').checked = website.permissions.includes('allow-scripts');
-        document.getElementById('perm-forms').checked = website.permissions.includes('allow-forms');
-        document.getElementById('perm-popups').checked = website.permissions.includes('allow-popups');
-        document.getElementById('perm-same-origin').checked = website.permissions.includes('allow-same-origin');
+        const scripts = document.getElementById('perm-scripts');
+        const forms = document.getElementById('perm-forms');
+        const popups = document.getElementById('perm-popups');
+        const sameOrigin = document.getElementById('perm-same-origin');
+        
+        if (scripts) scripts.checked = website.permissions.includes('allow-scripts');
+        if (forms) forms.checked = website.permissions.includes('allow-forms');
+        if (popups) popups.checked = website.permissions.includes('allow-popups');
+        if (sameOrigin) sameOrigin.checked = website.permissions.includes('allow-same-origin');
         
         // Change button text
         const btn = document.getElementById('add-website-btn');
-        btn.innerHTML = `<i class="fas fa-save"></i> UPDATE WEBSITE`;
-        btn.onclick = () => updateWebsite(id);
+        if (btn) {
+            btn.innerHTML = `<i class="fas fa-save"></i> UPDATE WEBSITE`;
+            btn.onclick = () => updateWebsite(id);
+        }
         
         showStatus(`Edit website "${website.name}"`, 'info');
     }
@@ -2496,18 +2656,29 @@ const SHADOW_STELLAR = (function() {
         const website = websitesDB.find(w => w.id === id);
         if (!website) return;
         
-        website.name = document.getElementById('web-name').value.trim();
-        website.url = document.getElementById('web-url').value.trim();
-        website.icon = document.getElementById('web-icon').value.trim();
-        website.category = document.getElementById('web-category').value;
-        website.description = document.getElementById('web-description').value.trim();
+        const nameInput = document.getElementById('web-name');
+        const urlInput = document.getElementById('web-url');
+        const iconInput = document.getElementById('web-icon');
+        const categoryInput = document.getElementById('web-category');
+        const descInput = document.getElementById('web-description');
+        
+        if (nameInput) website.name = nameInput.value.trim();
+        if (urlInput) website.url = urlInput.value.trim();
+        if (iconInput) website.icon = iconInput.value.trim();
+        if (categoryInput) website.category = categoryInput.value;
+        if (descInput) website.description = descInput.value.trim();
         
         // Update permissions
         website.permissions = [];
-        if (document.getElementById('perm-scripts').checked) website.permissions.push('allow-scripts');
-        if (document.getElementById('perm-forms').checked) website.permissions.push('allow-forms');
-        if (document.getElementById('perm-popups').checked) website.permissions.push('allow-popups');
-        if (document.getElementById('perm-same-origin').checked) website.permissions.push('allow-same-origin');
+        const scripts = document.getElementById('perm-scripts');
+        const forms = document.getElementById('perm-forms');
+        const popups = document.getElementById('perm-popups');
+        const sameOrigin = document.getElementById('perm-same-origin');
+        
+        if (scripts && scripts.checked) website.permissions.push('allow-scripts');
+        if (forms && forms.checked) website.permissions.push('allow-forms');
+        if (popups && popups.checked) website.permissions.push('allow-popups');
+        if (sameOrigin && sameOrigin.checked) website.permissions.push('allow-same-origin');
         
         // Save to Supabase
         if (supabase) {
@@ -2524,15 +2695,17 @@ const SHADOW_STELLAR = (function() {
         renderUI();
         
         // Reset form
-        document.getElementById('web-name').value = '';
-        document.getElementById('web-url').value = '';
-        document.getElementById('web-icon').value = 'fas fa-globe';
-        document.getElementById('web-description').value = '';
+        if (nameInput) nameInput.value = '';
+        if (urlInput) urlInput.value = '';
+        if (iconInput) iconInput.value = 'fas fa-globe';
+        if (descInput) descInput.value = '';
         
         // Reset button
         const btn = document.getElementById('add-website-btn');
-        btn.innerHTML = `<i class="fas fa-save"></i> SIMPAN WEBSITE`;
-        btn.onclick = addWebsiteFromAdmin;
+        if (btn) {
+            btn.innerHTML = `<i class="fas fa-save"></i> SIMPAN WEBSITE`;
+            btn.onclick = addWebsiteFromAdmin;
+        }
         
         showStatus(`Website "${website.name}" berhasil diperbarui!`, 'success');
     }
@@ -2645,8 +2818,12 @@ const SHADOW_STELLAR = (function() {
     }
     
     function showDeveloperCode() {
-        elements['developer-modal'].style.display = 'flex';
-        elements['current-dev-code'].textContent = systemSettings.developerCode;
+        if (elements['developer-modal']) {
+            elements['developer-modal'].style.display = 'flex';
+        }
+        if (elements['current-dev-code']) {
+            elements['current-dev-code'].textContent = systemSettings.developerCode;
+        }
     }
     
     function copyDeveloperCode() {
@@ -2661,7 +2838,9 @@ const SHADOW_STELLAR = (function() {
     }
     
     function closeDeveloperModal() {
-        elements['developer-modal'].style.display = 'none';
+        if (elements['developer-modal']) {
+            elements['developer-modal'].style.display = 'none';
+        }
     }
     
     async function saveWebsiteMaintenance() {
@@ -2697,9 +2876,9 @@ const SHADOW_STELLAR = (function() {
     }
     
     async function addAdminAccount() {
-        const username = document.getElementById('new-username').value.trim();
-        const password = document.getElementById('new-password').value.trim();
-        const role = document.getElementById('new-role').value;
+        const username = document.getElementById('new-username') ? document.getElementById('new-username').value.trim() : '';
+        const password = document.getElementById('new-password') ? document.getElementById('new-password').value.trim() : '';
+        const role = document.getElementById('new-role') ? document.getElementById('new-role').value : 'admin';
         
         if (!username || !password) {
             showStatus('Username dan password harus diisi!', 'error');
@@ -2765,15 +2944,18 @@ const SHADOW_STELLAR = (function() {
         switchAdminTab('accounts');
         
         // Reset form
-        document.getElementById('new-username').value = '';
-        document.getElementById('new-password').value = '';
+        const userInput = document.getElementById('new-username');
+        const passInput = document.getElementById('new-password');
+        
+        if (userInput) userInput.value = '';
+        if (passInput) passInput.value = '';
         
         showStatus(`Admin "${username}" berhasil ditambahkan!`, 'success');
     }
     
     async function changeCurrentPassword() {
-        const currentPassword = document.getElementById('current-password').value.trim();
-        const newPassword = document.getElementById('new-password-current').value.trim();
+        const currentPassword = document.getElementById('current-password') ? document.getElementById('current-password').value.trim() : '';
+        const newPassword = document.getElementById('new-password-current') ? document.getElementById('new-password-current').value.trim() : '';
         
         if (!currentPassword || !newPassword) {
             showStatus('Password saat ini dan baru harus diisi!', 'error');
@@ -2829,8 +3011,11 @@ const SHADOW_STELLAR = (function() {
         }
         
         // Clear form
-        document.getElementById('current-password').value = '';
-        document.getElementById('new-password-current').value = '';
+        const currPassInput = document.getElementById('current-password');
+        const newPassInput = document.getElementById('new-password-current');
+        
+        if (currPassInput) currPassInput.value = '';
+        if (newPassInput) newPassInput.value = '';
         
         showStatus('Password berhasil diubah!', 'success');
     }
@@ -2860,15 +3045,32 @@ const SHADOW_STELLAR = (function() {
     }
     
     async function saveSystemSettings() {
-        // Update system name and tagline
-        systemSettings.systemName = document.getElementById('system-name').value.trim();
-        systemSettings.tagline = document.getElementById('system-tagline').value.trim();
+        const nameInput = document.getElementById('system-name');
+        const taglineInput = document.getElementById('system-tagline');
+        const codeLengthInput = document.getElementById('code-length');
+        const sessionTimeoutInput = document.getElementById('session-timeout');
+        const idleTimeoutInput = document.getElementById('idle-timeout');
+        const maxAttemptsInput = document.getElementById('max-attempts');
         
-        // Update security settings
-        systemSettings.codeLength = parseInt(document.getElementById('code-length').value);
-        systemSettings.sessionTimeout = parseInt(document.getElementById('session-timeout').value);
-        systemSettings.idleTimeout = parseInt(document.getElementById('idle-timeout').value);
-        systemSettings.maxLoginAttempts = parseInt(document.getElementById('max-attempts').value);
+        if (nameInput) {
+            systemSettings.systemName = nameInput.value.trim();
+        }
+        if (taglineInput) {
+            systemSettings.tagline = taglineInput.value.trim();
+        }
+        
+        if (codeLengthInput) {
+            systemSettings.codeLength = parseInt(codeLengthInput.value);
+        }
+        if (sessionTimeoutInput) {
+            systemSettings.sessionTimeout = parseInt(sessionTimeoutInput.value);
+        }
+        if (idleTimeoutInput) {
+            systemSettings.idleTimeout = parseInt(idleTimeoutInput.value);
+        }
+        if (maxAttemptsInput) {
+            systemSettings.maxLoginAttempts = parseInt(maxAttemptsInput.value);
+        }
         
         // Save to Supabase
         if (supabase) {
@@ -3096,35 +3298,51 @@ const SHADOW_STELLAR = (function() {
     }
     
     function openImportModal() {
-        elements['import-modal'].style.display = 'flex';
-        elements['import-json'].value = '';
-        elements['file-info'].textContent = '';
+        if (elements['import-modal']) {
+            elements['import-modal'].style.display = 'flex';
+        }
+        if (elements['import-json']) {
+            elements['import-json'].value = '';
+        }
+        if (elements['file-info']) {
+            elements['file-info'].textContent = '';
+        }
     }
     
     function closeImportModal() {
-        elements['import-modal'].style.display = 'none';
+        if (elements['import-modal']) {
+            elements['import-modal'].style.display = 'none';
+        }
     }
     
     function handleFileImport(e) {
         const file = e.target.files[0];
         if (!file) return;
         
-        elements['file-info'].textContent = `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        if (elements['file-info']) {
+            elements['file-info'].textContent = `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        }
         
         const reader = new FileReader();
         reader.onload = function(event) {
             try {
                 const json = JSON.parse(event.target.result);
-                elements['import-json'].value = JSON.stringify(json, null, 2);
+                if (elements['import-json']) {
+                    elements['import-json'].value = JSON.stringify(json, null, 2);
+                }
             } catch (error) {
                 showStatus('File tidak valid!', 'error');
-                elements['file-info'].textContent = 'File tidak valid';
+                if (elements['file-info']) {
+                    elements['file-info'].textContent = 'File tidak valid';
+                }
             }
         };
         reader.readAsText(file);
     }
     
     async function confirmImport() {
+        if (!elements['import-json']) return;
+        
         const jsonText = elements['import-json'].value.trim();
         
         if (!jsonText) {
@@ -3227,6 +3445,27 @@ const SHADOW_STELLAR = (function() {
     
     // Setup Event Listeners
     function setupEventListeners() {
+        // Settings button
+        if (elements['settings-btn']) {
+            elements['settings-btn'].addEventListener('click', toggleSettingsMenu);
+        }
+        
+        // Settings menu items
+        const menuItems = {
+            'toggle-descriptions': toggleDescriptions,
+            'toggle-mode': toggleDarkMode,
+            'export-config': exportConfiguration,
+            'import-config': openImportModal,
+            'kiosk-mode': toggleKioskMode
+        };
+        
+        Object.entries(menuItems).forEach(([id, handler]) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('click', handler);
+            }
+        });
+        
         // Admin button
         if (elements['admin-btn']) {
             elements['admin-btn'].addEventListener('click', openLogin);
@@ -3235,38 +3474,6 @@ const SHADOW_STELLAR = (function() {
         // Session logout
         if (elements['logout-btn']) {
             elements['logout-btn'].addEventListener('click', logout);
-        }
-        
-        // Search functionality
-        if (elements['website-search']) {
-            elements['website-search'].addEventListener('input', filterWebsites);
-        }
-        if (elements['clear-search']) {
-            elements['clear-search'].addEventListener('click', clearSearch);
-        }
-        
-        // Category filter
-        if (elements.categoryButtons) {
-            elements.categoryButtons.forEach(btn => {
-                btn.addEventListener('click', () => filterByCategory(btn.dataset.category));
-            });
-        }
-        
-        // View controls
-        if (elements['toggle-descriptions']) {
-            elements['toggle-descriptions'].addEventListener('click', toggleDescriptions);
-        }
-        if (elements['export-config']) {
-            elements['export-config'].addEventListener('click', exportConfiguration);
-        }
-        if (elements['import-config']) {
-            elements['import-config'].addEventListener('click', openImportModal);
-        }
-        if (elements['toggle-mode']) {
-            elements['toggle-mode'].addEventListener('click', toggleDarkMode);
-        }
-        if (elements['kiosk-mode']) {
-            elements['kiosk-mode'].addEventListener('click', toggleKioskMode);
         }
         
         // Browser controls
@@ -3396,13 +3603,11 @@ const SHADOW_STELLAR = (function() {
             // Skip if in input field or kiosk mode
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || kioskMode) return;
             
-            // Ctrl+K for search
-            if (e.ctrlKey && e.key === 'k') {
+            // Ctrl+Shift+S for settings
+            if (e.ctrlKey && e.shiftKey && e.key === 'S') {
                 e.preventDefault();
-                if (elements['website-search']) {
-                    elements['website-search'].focus();
-                }
-                showStatus('Fokus pencarian', 'info');
+                toggleSettingsMenu();
+                showStatus('Menu settings', 'info');
             }
             
             // Esc to close
@@ -3413,6 +3618,8 @@ const SHADOW_STELLAR = (function() {
                     closeAdminPanel();
                 } else if (elements['login-modal'] && elements['login-modal'].style.display === 'flex') {
                     closeLogin();
+                } else if (elements['settings-menu'] && elements['settings-menu'].classList.contains('active')) {
+                    elements['settings-menu'].classList.remove('active');
                 }
             }
             

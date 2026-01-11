@@ -41,68 +41,50 @@
     
     <!-- Main Container -->
     <div class="main-container">
-        <!-- Search Container Minimalis -->
-        <div class="search-container" id="search-container">
-            <div class="search-header">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" 
-                           id="website-search" 
-                           placeholder="Cari website... (Ctrl+K)"
-                           autocomplete="off">
-                    <button class="clear-search" id="clear-search" title="Bersihkan">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+        <!-- Header Minimal -->
+        <div class="main-header">
+            <h1>SHADOW STELLAR</h1>
+            
+            <!-- Settings Button -->
+            <div class="settings-container">
+                <button class="settings-btn" id="settings-btn" title="Pengaturan">
+                    <i class="fas fa-cog"></i>
+                </button>
                 
-                <!-- Tombol Settings Minimalis -->
-                <div class="settings-dropdown-container">
-                    <button class="settings-btn" id="settings-btn" title="Pengaturan">
-                        <i class="fas fa-cog"></i>
-                    </button>
-                    <div class="settings-dropdown" id="settings-dropdown">
-                        <div class="dropdown-item" id="dropdown-toggle-descriptions">
-                            <i class="fas fa-align-left"></i>
-                            <span>Deskripsi</span>
-                            <div class="toggle-switch">
-                                <div class="toggle-slider"></div>
-                            </div>
+                <!-- Settings Menu -->
+                <div class="settings-menu" id="settings-menu">
+                    <div class="menu-item" id="toggle-descriptions">
+                        <i class="fas fa-align-left"></i>
+                        <span>Deskripsi</span>
+                        <div class="toggle-switch">
+                            <div class="toggle-slider"></div>
                         </div>
-                        <div class="dropdown-item" id="dropdown-toggle-mode">
-                            <i class="fas fa-moon"></i>
-                            <span>Mode Dark</span>
-                            <div class="toggle-switch">
-                                <div class="toggle-slider"></div>
-                            </div>
+                    </div>
+                    <div class="menu-item" id="toggle-mode">
+                        <i class="fas fa-moon"></i>
+                        <span>Mode Dark</span>
+                        <div class="toggle-switch">
+                            <div class="toggle-slider"></div>
                         </div>
-                        <div class="dropdown-divider"></div>
-                        <div class="dropdown-item" id="dropdown-export-config">
-                            <i class="fas fa-download"></i>
-                            <span>Ekspor Konfigurasi</span>
-                        </div>
-                        <div class="dropdown-item" id="dropdown-import-config">
-                            <i class="fas fa-upload"></i>
-                            <span>Impor Konfigurasi</span>
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <div class="dropdown-item" id="dropdown-kiosk-mode">
-                            <i class="fas fa-tv"></i>
-                            <span>Mode Kiosk</span>
-                            <div class="toggle-switch">
-                                <div class="toggle-slider"></div>
-                            </div>
+                    </div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-item" id="export-config">
+                        <i class="fas fa-download"></i>
+                        <span>Ekspor Konfigurasi</span>
+                    </div>
+                    <div class="menu-item" id="import-config">
+                        <i class="fas fa-upload"></i>
+                        <span>Impor Konfigurasi</span>
+                    </div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-item" id="kiosk-mode">
+                        <i class="fas fa-tv"></i>
+                        <span>Mode Kiosk</span>
+                        <div class="toggle-switch">
+                            <div class="toggle-slider"></div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Category Filter -->
-            <div class="category-filter">
-                <button class="category-btn active" data-category="all">Semua</button>
-                <button class="category-btn" data-category="portal">Portal</button>
-                <button class="category-btn" data-category="tools">Tools</button>
-                <button class="category-btn" data-category="media">Media</button>
-                <button class="category-btn" data-category="internal">Internal</button>
             </div>
         </div>
         
@@ -434,9 +416,12 @@
     <!-- External Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     
-    <!-- Supabase Client (WAJIB) -->
+     <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+
+    <!-- Supabase Migration Helper -->
+    <script src="supabase.js"></script>
+
     <!-- Project Files -->
     <script src="config.js"></script>
     <script src="app.js"></script>

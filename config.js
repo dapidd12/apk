@@ -121,8 +121,8 @@ const SHADOW_STELLAR_CONFIG = (function() {
 
     // Supabase Configuration (GANTI DENGAN KONFIGURASI ANDA)
     const SUPABASE_CONFIG = {
-        url: "https://your-project.supabase.co", // Ganti dengan URL Supabase Anda
-        anonKey: "your-anon-key" // Ganti dengan anon key Anda
+        url: "https://mivweeseoqutfcfcxepf.supabase.co",
+        anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pdndlZXNlb3F1dGZjZmN4ZXBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxMTE3NjYsImV4cCI6MjA4MzY4Nzc2Nn0.JsjFC9-Ry-jb427TWLn4xGTRaFN6TEG8GTn1eEZjwUE"
     };
 
     // Export configuration
