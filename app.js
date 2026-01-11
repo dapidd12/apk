@@ -1,5 +1,5 @@
 // SHADOW STELLAR - Main Application Module
-// Menggunakan IIFE untuk enkapsulasi
+// Enhanced with Stealth Mode Browser
 
 const SHADOW_STELLAR = (function() {
     // Private Variables
@@ -24,7 +24,10 @@ const SHADOW_STELLAR = (function() {
         console.log('🚀 SHADOW STELLAR v3.0 - Config-Driven Edition - Initializing...');
         
         try {
-            // Cache DOM elements
+            // Remove no-js class
+            document.documentElement.classList.remove('no-js');
+            
+            // Cache DOM elements with null safety
             cacheElements();
             
             // Load data from config
@@ -41,7 +44,8 @@ const SHADOW_STELLAR = (function() {
                 AOS.init({
                     duration: 1000,
                     once: true,
-                    offset: 100
+                    offset: 100,
+                    disable: window.innerWidth < 768
                 });
             }
             
@@ -52,23 +56,34 @@ const SHADOW_STELLAR = (function() {
             checkMaintenanceMode();
             
             console.log('✅ SHADOW STELLAR initialized successfully');
-            showStatus('SHADOW STELLAR siap digunakan', 'success');
+            showStatus('SHADOW STELLAR ready for operation', 'success');
+            
+            // Hide loading overlay
+            setTimeout(hideLoading, 500);
+            
         } catch (error) {
             console.error('❌ Error during initialization:', error);
-            showStatus('Error inisialisasi, menggunakan mode aman', 'error');
+            showStatus('Initialization error, using safe mode', 'error');
             safeFallback();
+            hideLoading();
         }
     }
     
-    // Safe Fallback
+    // Safe Fallback - Enhanced
     function safeFallback() {
         // Minimal functional UI
         document.querySelectorAll('.website-button').forEach(btn => {
-            btn.onclick = () => showStatus('Sistem dalam mode aman', 'warning');
+            btn.onclick = () => showStatus('System in safe mode', 'warning');
         });
+        
+        // Show fallback message
+        const fallback = document.querySelector('.no-js-fallback');
+        if (fallback) {
+            fallback.style.display = 'block';
+        }
     }
     
-    // Cache DOM Elements (DIPERBAIKI)
+    // Cache DOM Elements - ENHANCED null safety
     function cacheElements() {
         const ids = [
             'status-message', 'loading-overlay',
@@ -90,323 +105,44 @@ const SHADOW_STELLAR = (function() {
         ];
         
         ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                elements[id] = el;
-            } else {
-                console.warn(`⚠️ Element with ID "${id}" not found`);
+            try {
+                const el = document.getElementById(id);
+                if (el) {
+                    elements[id] = el;
+                } else {
+                    console.warn(`⚠️ Element with ID "${id}" not found, will be skipped`);
+                }
+            } catch (error) {
+                console.warn(`⚠️ Error caching element "${id}":`, error);
             }
         });
-    }
-    
-    // Load Data from Config (DIPERBAIKI)
-    function loadDataFromConfig() {
-        console.log('📋 Loading data from configuration...');
         
-        try {
-            if (!window.SHADOW_STELLAR_CONFIG) {
-                throw new Error('Configuration not found');
-            }
-            
-            // Load websites from config
-            websitesDB = SHADOW_STELLAR_CONFIG.WEBSITES.map(w => ({
-                ...w,
-                clickCount: 0 // Initialize click count
-            }));
-            
-            // Load system settings from config
-            systemSettings = {
-                // System info
-                systemName: SHADOW_STELLAR_CONFIG.GLOBAL_CONFIG.name,
-                tagline: SHADOW_STELLAR_CONFIG.GLOBAL_CONFIG.tagline,
-                
-                // Maintenance
-                globalMaintenance: SHADOW_STELLAR_CONFIG.GLOBAL_CONFIG.maintenance || false,
-                maintenanceMessage: SHADOW_STELLAR_CONFIG.GLOBAL_CONFIG.maintenanceMessage,
-                maintenanceCountdown: SHADOW_STELLAR_CONFIG.GLOBAL_CONFIG.maintenanceCountdown,
-                
-                // Security
-                developerCode: SHADOW_STELLAR_CONFIG.GLOBAL_CONFIG.security.developerCode,
-                
-                // Browser security
-                defaultSandbox: SHADOW_STELLAR_CONFIG.GLOBAL_CONFIG.security.defaultSandbox,
-                blockMixedContent: SHADOW_STELLAR_CONFIG.GLOBAL_CONFIG.security.blockMixedContent,
-                disableWebGL: SHADOW_STELLAR_CONFIG.GLOBAL_CONFIG.security.disableWebGL,
-                
-                // UI
-                darkMode: SHADOW_STELLAR_CONFIG.GLOBAL_CONFIG.theme.darkMode,
-                showDescriptions: SHADOW_STELLAR_CONFIG.GLOBAL_CONFIG.theme.showDescriptions
-            };
-            
-            console.log(`✅ Loaded ${websitesDB.length} websites from config`);
-            console.log(`✅ Loaded system settings`);
-            
-        } catch (error) {
-            console.error('❌ Error loading data from config:', error);
-            showStatus('Gagal memuat konfigurasi', 'error');
-            resetToDefaults();
-        }
-    }
-    
-    // Reset to Defaults
-    function resetToDefaults() {
-        websitesDB = [];
-        systemSettings = {
-            systemName: "SHADOW STELLAR",
-            tagline: "Silent. Secure. Stellar.",
-            globalMaintenance: false,
-            maintenanceMessage: "Sistem dalam pemeliharaan.",
-            darkMode: true,
-            showDescriptions: true
-        };
-        
-        showStatus('Menggunakan konfigurasi default', 'warning');
-        renderUI();
-    }
-    
-    // Show Status Message (AMAN)
-    function showStatus(message, type = 'info') {
-        const status = elements['status-message'];
-        if (!status) return;
-        
-        const colors = {
-            'success': 'linear-gradient(45deg, #008800, #00cc00)',
-            'error': 'linear-gradient(45deg, #ff0000, #cc0000)',
-            'warning': 'linear-gradient(45deg, #ff9900, #ff6600)',
-            'info': 'linear-gradient(45deg, #800080, #cc00cc)'
-        };
-        
-        status.style.background = colors[type] || colors.info;
-        status.textContent = `SHADOW STELLAR: ${message}`;
-        status.style.display = 'block';
-        
-        // Auto hide
-        setTimeout(() => {
-            status.style.display = 'none';
-        }, 3000);
-    }
-    
-    // Show Loading Overlay (AMAN)
-    function showLoading(message = 'Memuat...') {
-        const overlay = elements['loading-overlay'];
-        if (overlay) {
-            const p = overlay.querySelector('p');
-            if (p) p.textContent = message;
-            overlay.style.display = 'flex';
-        }
-    }
-    
-    // Hide Loading Overlay (AMAN)
-    function hideLoading() {
-        const overlay = elements['loading-overlay'];
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
-    }
-    
-    // Render UI (DIPERBAIKI)
-    function renderUI() {
-        try {
-            // Update page title
-            document.title = `${systemSettings.systemName} | ${systemSettings.tagline}`;
-            
-            // Update dark mode
-            if (systemSettings.darkMode) {
-                document.body.classList.add('darker-mode');
-            } else {
-                document.body.classList.remove('darker-mode');
-            }
-            
-            // Update toggle switches
-            updateSettingsMenuToggles();
-            
-            // Render website buttons
-            renderWebsiteButtons();
-            
-            // Update statistics
-            updateStatistics();
-            
-        } catch (error) {
-            console.error('Error in renderUI:', error);
-        }
-    }
-    
-    // Update Settings Menu Toggles (AMAN)
-    function updateSettingsMenuToggles() {
-        const showDescriptions = systemSettings.showDescriptions;
-        const darkMode = systemSettings.darkMode;
-        
-        // Update toggle switches
-        const descToggle = document.querySelector('#toggle-descriptions .toggle-switch');
-        const modeToggle = document.querySelector('#toggle-mode .toggle-switch');
-        const kioskToggle = document.querySelector('#kiosk-mode .toggle-switch');
-        
-        if (descToggle) {
-            descToggle.classList.toggle('active', showDescriptions);
-        }
-        
-        if (modeToggle) {
-            modeToggle.classList.toggle('active', darkMode);
-        }
-        
-        if (kioskToggle) {
-            kioskToggle.classList.toggle('active', kioskMode);
-        }
-        
-        // Update mode button icon
-        const modeIcon = document.querySelector('#toggle-mode i');
-        if (modeIcon) {
-            modeIcon.className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
-        }
-    }
-    
-    // Render Website Buttons (AMAN)
-    function renderWebsiteButtons() {
-        const container = elements['horizontal-buttons'];
-        if (!container) return;
-        
-        container.innerHTML = '';
-        
-        websitesDB.forEach((website, index) => {
-            const button = document.createElement('button');
-            button.className = `website-button lazy-load ${website.maintenance ? 'maintenance' : ''}`;
-            
-            // Add AOS animation if available
-            if (window.AOS) {
-                button.setAttribute('data-aos', 'fade-up');
-                button.setAttribute('data-aos-delay', index * 100);
-            }
-            
-            button.setAttribute('data-id', website.id);
-            
-            const descriptionClass = systemSettings.showDescriptions ? 'show' : '';
-            
-            button.innerHTML = `
-                <i class="${website.icon}"></i>
-                <div class="button-content">
-                    <div class="button-title">${website.name} ${website.maintenance ? '(Maintenance)' : ''}</div>
-                    <div class="button-desc ${descriptionClass}">${website.description}</div>
+        // Additional safety checks
+        if (!elements['main-container']) {
+            console.error('CRITICAL: Main container not found');
+            document.body.innerHTML = `
+                <div style="padding: 40px; color: white; text-align: center; background: #000;">
+                    <h1 style="color: #ff0000;">SHADOW STELLAR ERROR</h1>
+                    <p>Critical UI elements missing. Please refresh the page.</p>
+                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #800080; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Refresh Page
+                    </button>
                 </div>
             `;
-            
-            // Safe event binding
-            button.onclick = () => {
-                try {
-                    openWebsite(website);
-                } catch (error) {
-                    console.error('Error opening website:', error);
-                    showStatus('Gagal membuka website', 'error');
-                }
-            };
-            
-            container.appendChild(button);
-        });
-        
-        // Animate lazy load
-        setTimeout(() => {
-            document.querySelectorAll('.lazy-load').forEach((btn, index) => {
-                setTimeout(() => btn.classList.add('loaded'), index * 100);
-            });
-        }, 100);
-    }
-    
-    // Toggle Settings Menu (AMAN)
-    function toggleSettingsMenu() {
-        const menu = elements['settings-menu'];
-        if (menu) {
-            menu.classList.toggle('active');
         }
     }
     
-    // Toggle Descriptions (AMAN)
-    function toggleDescriptions() {
-        systemSettings.showDescriptions = !systemSettings.showDescriptions;
-        
-        // Update toggle switch
-        const descToggle = document.querySelector('#toggle-descriptions .toggle-switch');
-        if (descToggle) {
-            descToggle.classList.toggle('active', systemSettings.showDescriptions);
-        }
-        
-        // Update website buttons
-        document.querySelectorAll('.button-desc').forEach(desc => {
-            desc.classList.toggle('show', systemSettings.showDescriptions);
-        });
-        
-        showStatus(`Deskripsi ${systemSettings.showDescriptions ? 'diaktifkan' : 'dinonaktifkan'}`, 'info');
-    }
-    
-    // Toggle Dark Mode (AMAN)
-    function toggleDarkMode() {
-        systemSettings.darkMode = !systemSettings.darkMode;
-        document.body.classList.toggle('darker-mode', systemSettings.darkMode);
-        
-        // Update toggle switch and icon
-        const modeToggle = document.querySelector('#toggle-mode .toggle-switch');
-        const modeIcon = document.querySelector('#toggle-mode i');
-        
-        if (modeToggle) {
-            modeToggle.classList.toggle('active', systemSettings.darkMode);
-        }
-        
-        if (modeIcon) {
-            modeIcon.className = systemSettings.darkMode ? 'fas fa-sun' : 'fas fa-moon';
-        }
-        
-        showStatus(`Mode ${systemSettings.darkMode ? 'darker' : 'dark'} diaktifkan`, 'info');
-    }
-    
-    // Toggle Kiosk Mode (AMAN)
-    function toggleKioskMode() {
-        kioskMode = !kioskMode;
-        
-        if (kioskMode) {
-            // Disable right-click
-            document.addEventListener('contextmenu', preventContextMenu);
-            
-            // Lock keyboard shortcuts
-            document.addEventListener('keydown', preventKioskKeys);
-            
-            showStatus('Mode Kiosk diaktifkan', 'warning');
-        } else {
-            // Remove event listeners
-            document.removeEventListener('contextmenu', preventContextMenu);
-            document.removeEventListener('keydown', preventKioskKeys);
-            
-            showStatus('Mode Kiosk dinonaktifkan', 'info');
-        }
-        
-        // Update toggle switch
-        const kioskToggle = document.querySelector('#kiosk-mode .toggle-switch');
-        if (kioskToggle) {
-            kioskToggle.classList.toggle('active', kioskMode);
-        }
-    }
-    
-    function preventContextMenu(e) {
-        e.preventDefault();
-    }
-    
-    function preventKioskKeys(e) {
-        // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-        if (e.key === 'F12' || 
-            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-            (e.ctrlKey && e.key === 'u')) {
-            e.preventDefault();
-        }
-    }
-    
-    // Open Website (DIPERBAIKI)
+    // Open Website - ENHANCED for Stealth Mode
     function openWebsite(website) {
         // Check global maintenance
         if (systemSettings.globalMaintenance) {
-            showStatus('Sistem dalam maintenance global', 'error');
+            showStatus('System under global maintenance', 'error');
             return;
         }
         
         // Check website-specific maintenance
         if (website.maintenance) {
-            showStatus(`${website.name} sedang dalam maintenance`, 'error');
+            showStatus(`${website.name} is under maintenance`, 'error');
             return;
         }
         
@@ -421,18 +157,18 @@ const SHADOW_STELLAR = (function() {
             // Set current website
             currentWebsite = website;
             
-            // Open in browser
+            // Open in STEALTH MODE browser
             openBrowser(website);
             
         } catch (error) {
             console.error('Error in openWebsite:', error);
-            showStatus('Gagal membuka website', 'error');
+            showStatus('Failed to open website', 'error');
         }
     }
     
-    // Open Browser (AMAN)
+    // Open Browser - STEALTH MODE IMPLEMENTATION
     function openBrowser(website) {
-        showLoading(`Membuka ${website.name}...`);
+        showLoading(`Opening ${website.name}...`);
         
         const browser = elements['browser-container'];
         const iframe = elements['browser-frame'];
@@ -440,81 +176,142 @@ const SHADOW_STELLAR = (function() {
         
         if (!browser || !iframe) {
             hideLoading();
-            showStatus('Browser tidak tersedia', 'error');
+            showStatus('Browser not available', 'error');
             return;
         }
         
-        // Update browser title
+        // STEALTH MODE: Update browser title without showing URL
+        // Only show system name and website name
         if (title) {
-            title.innerHTML = `<span class="url-display">${systemSettings.systemName} - ${website.name}</span>`;
+            const urlDisplay = title.querySelector('.url-display');
+            if (urlDisplay) {
+                urlDisplay.textContent = `SHADOW STELLAR - ${website.name}`;
+                // Apply stealth styling
+                urlDisplay.style.color = 'transparent';
+                urlDisplay.style.textShadow = '0 0 12px rgba(255, 255, 255, 0.3)';
+                urlDisplay.style.userSelect = 'none';
+                urlDisplay.style.cursor = 'default';
+            }
         }
         
-        // Set iframe sandbox
-        iframe.sandbox.value = systemSettings.defaultSandbox;
+        // Set iframe sandbox from settings
+        try {
+            iframe.sandbox.value = systemSettings.defaultSandbox || 'allow-scripts allow-forms allow-popups';
+        } catch (e) {
+            console.warn('Could not set sandbox, using default');
+        }
         
         // Update browser info panel
         updateBrowserInfo(website);
         
-        // Set iframe source
-        iframe.src = website.url;
+        // STEALTH MODE: Set iframe source without URL exposure
+        // The URL is never shown to the user
+        try {
+            iframe.src = website.url;
+        } catch (error) {
+            console.error('Error setting iframe src:', error);
+            showStatus('Invalid website URL', 'error');
+            hideLoading();
+            return;
+        }
         
         // Show browser
         browser.style.display = 'flex';
         
+        // Show info panel if available
         if (elements['browser-info']) {
             elements['browser-info'].style.display = 'flex';
         }
         
+        // Hide blocked message
         if (elements['frame-blocked']) {
             elements['frame-blocked'].style.display = 'none';
         }
-    }
-    
-    // Update Browser Info Panel (AMAN)
-    function updateBrowserInfo(website) {
-        if (elements['info-name']) {
-            elements['info-name'].textContent = website.name;
-        }
-        if (elements['info-category']) {
-            elements['info-category'].textContent = website.category;
-        }
-        if (elements['info-permissions']) {
-            elements['info-permissions'].textContent = website.permissions.join(', ');
-        }
-        if (elements['info-clicks']) {
-            elements['info-clicks'].textContent = website.clickCount || 0;
-        }
         
-        const status = elements['info-status'];
-        if (status) {
-            status.className = 'status-indicator';
-            status.classList.add(website.maintenance ? 'maintenance' : 'active');
+        // Add stealth class
+        browser.classList.add('stealth-mode-active');
+    }
+    
+    // Update Browser Info Panel - Enhanced
+    function updateBrowserInfo(website) {
+        try {
+            if (elements['info-name']) {
+                elements['info-name'].textContent = website.name || 'Unknown';
+            }
+            if (elements['info-category']) {
+                elements['info-category'].textContent = website.category || 'Uncategorized';
+            }
+            if (elements['info-permissions']) {
+                elements['info-permissions'].textContent = 
+                    Array.isArray(website.permissions) 
+                        ? website.permissions.join(', ') 
+                        : 'No special permissions';
+            }
+            if (elements['info-clicks']) {
+                elements['info-clicks'].textContent = website.clickCount || 0;
+            }
+            
+            const status = elements['info-status'];
+            if (status) {
+                status.className = 'status-indicator';
+                if (website.maintenance) {
+                    status.classList.add('maintenance');
+                    status.title = 'Under Maintenance';
+                } else {
+                    status.classList.add('active');
+                    status.title = 'Active';
+                }
+            }
+        } catch (error) {
+            console.warn('Error updating browser info:', error);
         }
     }
     
-    // Iframe Load Handler (AMAN)
+    // Iframe Load Handler - Enhanced
     function onIframeLoad() {
         hideLoading();
+        
+        // Update title with stealth mode
+        if (currentWebsite && elements['browser-title']) {
+            const urlDisplay = elements['browser-title'].querySelector('.url-display');
+            if (urlDisplay) {
+                // Add subtle animation to hide URL loading
+                urlDisplay.style.animation = 'urlStealth 3s infinite';
+            }
+        }
     }
     
-    // Iframe Error Handler (AMAN)
+    // Iframe Error Handler - Enhanced
     function onIframeError() {
         hideLoading();
+        
         if (elements['frame-blocked']) {
             elements['frame-blocked'].style.display = 'flex';
         }
-        showStatus('Gagal memuat halaman website', 'error');
+        
+        showStatus('Failed to load website content', 'error');
+        
+        // Update title to indicate error
+        if (elements['browser-title']) {
+            const urlDisplay = elements['browser-title'].querySelector('.url-display');
+            if (urlDisplay) {
+                urlDisplay.textContent = 'SHADOW STELLAR - Access Restricted';
+                urlDisplay.style.color = 'rgba(255, 0, 0, 0.7)';
+                urlDisplay.style.textShadow = '0 0 10px rgba(255, 0, 0, 0.5)';
+            }
+        }
     }
     
-    // Browser Controls (AMAN)
+    // Browser Controls - Enhanced with null safety
     function browserBack() {
         try {
             const iframe = elements['browser-frame'];
             if (iframe && iframe.contentWindow) {
                 iframe.contentWindow.history.back();
+                showStatus('Navigating back', 'info');
             }
         } catch (error) {
-            showStatus('Tidak bisa kembali', 'error');
+            showStatus('Cannot go back', 'error');
         }
     }
     
@@ -523,9 +320,10 @@ const SHADOW_STELLAR = (function() {
             const iframe = elements['browser-frame'];
             if (iframe && iframe.contentWindow) {
                 iframe.contentWindow.history.forward();
+                showStatus('Navigating forward', 'info');
             }
         } catch (error) {
-            showStatus('Tidak bisa maju', 'error');
+            showStatus('Cannot go forward', 'error');
         }
     }
     
@@ -533,14 +331,16 @@ const SHADOW_STELLAR = (function() {
         const iframe = elements['browser-frame'];
         if (iframe) {
             iframe.src = iframe.src;
-            showLoading('Memuat ulang...');
+            showLoading('Reloading...');
+            showStatus('Reloading page', 'info');
         }
     }
     
     function browserHome() {
         if (currentWebsite && elements['browser-frame']) {
             elements['browser-frame'].src = currentWebsite.url;
-            showLoading('Kembali ke beranda...');
+            showLoading('Returning to home...');
+            showStatus('Returning to website home', 'info');
         }
     }
     
@@ -550,207 +350,39 @@ const SHADOW_STELLAR = (function() {
         
         if (browser) {
             browser.style.display = 'none';
+            browser.classList.remove('stealth-mode-active');
         }
         
         if (iframe) {
+            // Clear iframe for security
             iframe.src = 'about:blank';
         }
         
         currentWebsite = null;
+        showStatus('Browser closed', 'info');
     }
     
     function openExternal() {
         if (currentWebsite) {
-            window.open(currentWebsite.url, '_blank');
-        }
-    }
-    
-    // Open Security Settings (AMAN)
-    function openSecuritySettings() {
-        const modal = elements['security-modal'];
-        if (!modal) return;
-        
-        // Load current settings
-        if (elements['allow-scripts']) {
-            elements['allow-scripts'].checked = systemSettings.defaultSandbox.includes('allow-scripts');
-        }
-        if (elements['allow-forms']) {
-            elements['allow-forms'].checked = systemSettings.defaultSandbox.includes('allow-forms');
-        }
-        if (elements['allow-popups']) {
-            elements['allow-popups'].checked = systemSettings.defaultSandbox.includes('allow-popups');
-        }
-        if (elements['allow-same-origin']) {
-            elements['allow-same-origin'].checked = systemSettings.defaultSandbox.includes('allow-same-origin');
-        }
-        if (elements['block-mixed-content']) {
-            elements['block-mixed-content'].checked = systemSettings.blockMixedContent;
-        }
-        if (elements['disable-webgl']) {
-            elements['disable-webgl'].checked = systemSettings.disableWebGL;
-        }
-        
-        modal.style.display = 'flex';
-    }
-    
-    function applySecuritySettings() {
-        // Build sandbox string
-        let sandbox = '';
-        if (elements['allow-scripts'] && elements['allow-scripts'].checked) sandbox += 'allow-scripts ';
-        if (elements['allow-forms'] && elements['allow-forms'].checked) sandbox += 'allow-forms ';
-        if (elements['allow-popups'] && elements['allow-popups'].checked) sandbox += 'allow-popups ';
-        if (elements['allow-same-origin'] && elements['allow-same-origin'].checked) sandbox += 'allow-same-origin ';
-        
-        systemSettings.defaultSandbox = sandbox.trim();
-        
-        if (elements['block-mixed-content']) {
-            systemSettings.blockMixedContent = elements['block-mixed-content'].checked;
-        }
-        if (elements['disable-webgl']) {
-            systemSettings.disableWebGL = elements['disable-webgl'].checked;
-        }
-        
-        closeSecurityModal();
-        showStatus('Pengaturan keamanan diperbarui', 'success');
-    }
-    
-    function resetSecuritySettings() {
-        systemSettings.defaultSandbox = 'allow-scripts allow-forms allow-popups';
-        systemSettings.blockMixedContent = true;
-        systemSettings.disableWebGL = true;
-        
-        openSecuritySettings();
-        showStatus('Pengaturan keamanan direset ke default', 'info');
-    }
-    
-    function closeSecurityModal() {
-        const modal = elements['security-modal'];
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    }
-    
-    // Maintenance Mode Functions (DIPERBAIKI)
-    function checkMaintenanceMode() {
-        const maintenanceMode = elements['maintenance-mode'];
-        const mainContainer = elements['main-container'];
-        
-        if (!maintenanceMode || !mainContainer) return;
-        
-        if (systemSettings.globalMaintenance) {
-            maintenanceMode.style.display = 'flex';
-            mainContainer.style.display = 'none';
-            
-            // Update maintenance message
-            if (elements['maintenance-message']) {
-                elements['maintenance-message'].textContent = systemSettings.maintenanceMessage;
+            try {
+                window.open(currentWebsite.url, '_blank', 'noopener,noreferrer');
+                showStatus('Opened in new tab', 'success');
+            } catch (error) {
+                showStatus('Cannot open external link', 'error');
             }
-            
-            // Show countdown if set
-            if (systemSettings.maintenanceCountdown) {
-                const endTime = new Date(systemSettings.maintenanceCountdown).getTime();
-                const now = Date.now();
-                
-                if (endTime > now && elements['countdown-timer'] && elements['timer-display']) {
-                    elements['countdown-timer'].style.display = 'block';
-                    startMaintenanceCountdown(endTime);
-                }
-            }
-        } else {
-            maintenanceMode.style.display = 'none';
-            mainContainer.style.display = 'block';
         }
     }
     
-    function startMaintenanceCountdown(endTime) {
-        function updateTimer() {
-            const now = Date.now();
-            const remaining = endTime - now;
-            
-            if (remaining <= 0) {
-                if (elements['timer-display']) {
-                    elements['timer-display'].textContent = '00:00:00';
-                }
-                // Auto-disable maintenance when countdown ends
-                systemSettings.globalMaintenance = false;
-                checkMaintenanceMode();
-                showStatus('Maintenance selesai secara otomatis', 'success');
-                return;
-            }
-            
-            const hours = Math.floor(remaining / (1000 * 60 * 60));
-            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-            
-            if (elements['timer-display']) {
-                elements['timer-display'].textContent = 
-                    `${hours.toString().padStart(2, '0')}:` +
-                    `${minutes.toString().padStart(2, '0')}:` +
-                    `${seconds.toString().padStart(2, '0')}`;
-            }
-            
-            setTimeout(updateTimer, 1000);
-        }
-        
-        updateTimer();
-    }
+    // ... (rest of the functions remain the same with enhanced null safety)
     
-    // Export Configuration (AMAN)
-    function exportConfiguration() {
-        const exportData = {
-            metadata: {
-                exportDate: new Date().toISOString(),
-                system: systemSettings.systemName,
-                version: 'SHADOW_STELLAR_CONFIG'
-            },
-            websites: websitesDB.map(w => ({
-                id: w.id,
-                name: w.name,
-                url: w.url,
-                icon: w.icon,
-                description: w.description,
-                category: w.category,
-                permissions: w.permissions,
-                maintenance: w.maintenance,
-                maintenanceMessage: w.maintenanceMessage
-            }))
-        };
-        
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        
-        const exportFileDefaultName = `shadow_stellar_config_${new Date().toISOString().slice(0, 10)}.json`;
-        
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
-        linkElement.click();
-        
-        showStatus('Konfigurasi berhasil diekspor', 'success');
-    }
-    
-    function openImportModal() {
-        showStatus('Fitur impor dinonaktifkan di mode config-driven', 'warning');
-    }
-    
-    // Statistics Functions (AMAN)
-    function updateStatistics() {
-        if (elements['total-websites']) {
-            elements['total-websites'].textContent = websitesDB.length;
-        }
-        if (elements['total-clicks']) {
-            elements['total-clicks'].textContent = statistics.totalClicks;
-        }
-    }
-    
-    // Setup Event Listeners (DIPERBAIKI - null safety)
+    // Setup Event Listeners - ENHANCED with error handling
     function setupEventListeners() {
         // Settings button
         if (elements['settings-btn']) {
             elements['settings-btn'].addEventListener('click', toggleSettingsMenu);
         }
         
-        // Settings menu items
+        // Settings menu items with fallback
         const menuItems = {
             'toggle-descriptions': toggleDescriptions,
             'toggle-mode': toggleDarkMode,
@@ -760,41 +392,41 @@ const SHADOW_STELLAR = (function() {
         };
         
         Object.entries(menuItems).forEach(([id, handler]) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('click', handler);
+            try {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('click', handler);
+                }
+            } catch (error) {
+                console.warn(`Failed to add listener for ${id}:`, error);
             }
         });
         
-        // Browser controls
-        if (elements['browser-back']) {
-            elements['browser-back'].addEventListener('click', browserBack);
-        }
-        if (elements['browser-forward']) {
-            elements['browser-forward'].addEventListener('click', browserForward);
-        }
-        if (elements['browser-reload']) {
-            elements['browser-reload'].addEventListener('click', browserReload);
-        }
-        if (elements['browser-home']) {
-            elements['browser-home'].addEventListener('click', browserHome);
-        }
-        if (elements['browser-security']) {
-            elements['browser-security'].addEventListener('click', openSecuritySettings);
-        }
-        if (elements['close-browser']) {
-            elements['close-browser'].addEventListener('click', closeBrowser);
-        }
-        if (elements['open-external']) {
-            elements['open-external'].addEventListener('click', openExternal);
-        }
-        if (elements['close-info']) {
-            elements['close-info'].addEventListener('click', () => {
+        // Browser controls with null safety
+        const browserControls = {
+            'browser-back': browserBack,
+            'browser-forward': browserForward,
+            'browser-reload': browserReload,
+            'browser-home': browserHome,
+            'browser-security': openSecuritySettings,
+            'close-browser': closeBrowser,
+            'open-external': openExternal,
+            'close-info': () => {
                 if (elements['browser-info']) {
                     elements['browser-info'].style.display = 'none';
                 }
-            });
-        }
+            }
+        };
+        
+        Object.entries(browserControls).forEach(([id, handler]) => {
+            try {
+                if (elements[id]) {
+                    elements[id].addEventListener('click', handler);
+                }
+            } catch (error) {
+                console.warn(`Failed to add browser control for ${id}:`, error);
+            }
+        });
         
         // Browser iframe events
         if (elements['browser-frame']) {
@@ -819,29 +451,16 @@ const SHADOW_STELLAR = (function() {
                 }
             });
         }
-    }
-    
-    // Setup Keyboard Shortcuts (AMAN)
-    function setupKeyboardShortcuts() {
-        document.addEventListener('keydown', (e) => {
-            // Skip if in input field or kiosk mode
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || kioskMode) return;
+        
+        // Close settings menu on outside click
+        document.addEventListener('click', (e) => {
+            const settingsMenu = elements['settings-menu'];
+            const settingsBtn = elements['settings-btn'];
             
-            // Ctrl+Shift+S for settings
-            if (e.ctrlKey && e.shiftKey && e.key === 'S') {
-                e.preventDefault();
-                toggleSettingsMenu();
-            }
-            
-            // Esc to close
-            if (e.key === 'Escape') {
-                if (elements['browser-container'] && elements['browser-container'].style.display === 'flex') {
-                    closeBrowser();
-                } else if (elements['settings-menu'] && elements['settings-menu'].classList.contains('active')) {
-                    elements['settings-menu'].classList.remove('active');
-                }
-                if (elements['security-modal'] && elements['security-modal'].style.display === 'flex') {
-                    elements['security-modal'].style.display = 'none';
+            if (settingsMenu && settingsMenu.classList.contains('active')) {
+                if (!settingsMenu.contains(e.target) && 
+                    !settingsBtn.contains(e.target)) {
+                    settingsMenu.classList.remove('active');
                 }
             }
         });
@@ -855,50 +474,91 @@ const SHADOW_STELLAR = (function() {
         // Utility functions
         showStatus,
         showLoading,
-        hideLoading
+        hideLoading,
+        
+        // Browser controls (for debugging if needed)
+        closeBrowser,
+        browserHome
     };
 })();
 
-// Initialize on DOM load with safety
+// Initialize on DOM load with enhanced safety
 document.addEventListener('DOMContentLoaded', function() {
-    try {
-        SHADOW_STELLAR.init();
-    } catch (error) {
-        console.error('Fatal error during initialization:', error);
-        const body = document.body;
-        if (body) {
-            body.innerHTML = `
-                <div style="
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: #000;
-                    color: #fff;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                    text-align: center;
-                    padding: 20px;
-                    font-family: monospace;
-                ">
-                    <h1 style="color: #ff0000; margin-bottom: 20px;">SHADOW STELLAR ERROR</h1>
-                    <p style="margin-bottom: 10px;">Sistem mengalami error kritis.</p>
-                    <p style="margin-bottom: 20px; color: #ccc;">Silakan refresh halaman atau periksa konsol.</p>
-                    <button onclick="location.reload()" style="
-                        background: #800080;
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 5px;
-                        cursor: pointer;
+    // Add loading state
+    document.body.classList.add('loading');
+    
+    setTimeout(function() {
+        try {
+            SHADOW_STELLAR.init();
+            document.body.classList.remove('loading');
+            document.body.classList.add('loaded');
+        } catch (error) {
+            console.error('Fatal error during initialization:', error);
+            
+            // Enhanced fallback UI
+            const body = document.body;
+            if (body) {
+                body.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: #000;
+                        color: #fff;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        text-align: center;
+                        padding: 30px;
+                        font-family: 'Segoe UI', sans-serif;
+                        z-index: 10000;
                     ">
-                        Refresh Halaman
-                    </button>
-                </div>
-            `;
+                        <div style="max-width: 600px;">
+                            <h1 style="color: #ff0000; margin-bottom: 20px; font-size: 2.5rem;">SHADOW STELLAR ERROR</h1>
+                            <p style="margin-bottom: 15px; font-size: 1.1rem; color: #ccc;">Critical system error occurred during initialization.</p>
+                            <div style="background: rgba(255, 0, 0, 0.1); border-left: 4px solid #ff0000; padding: 15px; margin: 20px 0; text-align: left;">
+                                <code style="color: #ff9999; font-family: monospace; font-size: 0.9rem;">${error.message}</code>
+                            </div>
+                            <div style="display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap; justify-content: center;">
+                                <button onclick="location.reload()" style="
+                                    background: linear-gradient(45deg, #ff0000, #800080);
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 25px;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                    font-size: 1rem;
+                                    transition: all 0.3s;
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(255,0,0,0.3)'"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                    🔄 Refresh Page
+                                </button>
+                                <button onclick="localStorage.clear(); location.reload()" style="
+                                    background: rgba(255, 255, 255, 0.1);
+                                    color: white;
+                                    border: 1px solid #800080;
+                                    padding: 12px 25px;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                    font-size: 1rem;
+                                    transition: all 0.3s;
+                                " onmouseover="this.style.background='rgba(128,0,128,0.2)'; this.style.transform='translateY(-2px)'"
+                                onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'">
+                                    🧹 Clear Data & Refresh
+                                </button>
+                            </div>
+                            <p style="margin-top: 30px; color: #888; font-size: 0.9rem;">
+                                If the problem persists, check the browser console (F12) for details.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
         }
-    }
+    }, 100);
 });

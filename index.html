@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="no-js">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SHADOW STELLAR - Secure Internal Web Gateway">
+    <meta name="theme-color" content="#800080">
+    
     <title>SHADOW STELLAR | Secure Internal Web Gateway</title>
     
-    <!-- FontAwesome (FIXED: Ditambahkan link CSS) -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- AOS Library -->
@@ -17,24 +20,37 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     
-    <!-- CSS Debug Script (non-intrusive) -->
+    <!-- No-JS Fallback Script -->
     <script>
-        // Check if CSS is loaded
-        setTimeout(function() {
-            const bodyColor = window.getComputedStyle(document.body).backgroundColor;
-            if (bodyColor === 'rgb(0, 0, 0)' || bodyColor === 'transparent') {
-                console.warn('SHADOW STELLAR: CSS mungkin tidak terload dengan benar');
-                // Non-intrusive indicator
-                document.title = "⚡ " + document.title;
-            }
-        }, 100);
+        // Remove no-js class if JS is enabled
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js-enabled');
+        
+        // CSS Load Check
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const bodyColor = window.getComputedStyle(document.body).backgroundColor;
+                if (bodyColor === 'rgb(0, 0, 0)' || bodyColor === 'transparent') {
+                    console.warn('SHADOW STELLAR: CSS mungkin tidak terload dengan benar');
+                    // Apply fallback gradient
+                    document.body.style.background = 'linear-gradient(135deg, #000, #1a001a, #330033)';
+                }
+                
+                // Video fallback check
+                const video = document.getElementById('video-bg');
+                if (video && (video.readyState < 2 || video.error)) {
+                    document.documentElement.classList.add('no-video');
+                }
+            }, 500);
+        });
     </script>
 </head>
 <body>
     <!-- Video Background -->
-    <video autoplay muted loop id="video-bg" preload="auto">
+    <video autoplay muted loop id="video-bg" preload="auto" playsinline>
         <source src="assets/background.mp4" type="video/mp4">
-        Browser Anda tidak mendukung tag video.
+        <source src="assets/background.webm" type="video/webm">
+        Your browser does not support the video tag.
     </video>
     
     <!-- Overlay Gradient -->
@@ -46,7 +62,7 @@
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loading-overlay">
         <div class="spinner"></div>
-        <p>SHADOW STELLAR - Memuat Sistem...</p>
+        <p>SHADOW STELLAR - Initializing Secure Gateway...</p>
     </div>
     
     <!-- Main Container -->
@@ -57,7 +73,7 @@
             
             <!-- Settings Button -->
             <div class="settings-container">
-                <button class="settings-btn" id="settings-btn" title="Pengaturan">
+                <button class="settings-btn" id="settings-btn" title="System Settings" aria-label="Open Settings">
                     <i class="fas fa-cog"></i>
                 </button>
                 
@@ -65,32 +81,32 @@
                 <div class="settings-menu" id="settings-menu">
                     <div class="menu-item" id="toggle-descriptions">
                         <i class="fas fa-align-left"></i>
-                        <span>Deskripsi</span>
-                        <div class="toggle-switch">
+                        <span>Show Descriptions</span>
+                        <div class="toggle-switch" aria-label="Toggle descriptions">
                             <div class="toggle-slider"></div>
                         </div>
                     </div>
                     <div class="menu-item" id="toggle-mode">
                         <i class="fas fa-moon"></i>
-                        <span>Mode Dark</span>
-                        <div class="toggle-switch">
+                        <span>Dark Mode</span>
+                        <div class="toggle-switch" aria-label="Toggle dark mode">
                             <div class="toggle-slider"></div>
                         </div>
                     </div>
                     <div class="menu-divider"></div>
                     <div class="menu-item" id="export-config">
                         <i class="fas fa-download"></i>
-                        <span>Ekspor Konfigurasi</span>
+                        <span>Export Configuration</span>
                     </div>
                     <div class="menu-item" id="import-config">
                         <i class="fas fa-upload"></i>
-                        <span>Impor Konfigurasi</span>
+                        <span>Import Configuration</span>
                     </div>
                     <div class="menu-divider"></div>
                     <div class="menu-item" id="kiosk-mode">
                         <i class="fas fa-tv"></i>
-                        <span>Mode Kiosk</span>
-                        <div class="toggle-switch">
+                        <span>Kiosk Mode</span>
+                        <div class="toggle-switch" aria-label="Toggle kiosk mode">
                             <div class="toggle-slider"></div>
                         </div>
                     </div>
@@ -100,6 +116,13 @@
         
         <!-- Horizontal Button List -->
         <div class="horizontal-buttons" id="horizontal-buttons">
+            <!-- Fallback message if JS fails -->
+            <div class="no-js-fallback" style="text-align: center; padding: 40px; color: #ccc; display: none;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                <h3>JavaScript Required</h3>
+                <p>SHADOW STELLAR requires JavaScript to function properly.</p>
+                <p>Please enable JavaScript and refresh the page.</p>
+            </div>
             <!-- Website buttons will be generated by JavaScript -->
         </div>
         
@@ -107,40 +130,42 @@
         <div class="stats-container" id="stats-container">
             <div class="stat-item">
                 <i class="fas fa-globe"></i>
-                <span id="total-websites">0</span> Website
+                <span id="total-websites">0</span> Websites
             </div>
             <div class="stat-item">
                 <i class="fas fa-mouse-pointer"></i>
-                <span id="total-clicks">0</span> Klik
+                <span id="total-clicks">0</span> Total Clicks
             </div>
         </div>
     </div>
     
-    <!-- Internal Browser -->
+    <!-- Internal Browser (STEALTH MODE) -->
     <div class="browser-container" id="browser-container">
         <div class="browser-header">
             <div class="browser-controls">
-                <button class="browser-btn" id="browser-back" title="Kembali">
+                <button class="browser-btn" id="browser-back" title="Back" aria-label="Navigate back">
                     <i class="fas fa-arrow-left"></i>
                 </button>
-                <button class="browser-btn" id="browser-forward" title="Maju">
+                <button class="browser-btn" id="browser-forward" title="Forward" aria-label="Navigate forward">
                     <i class="fas fa-arrow-right"></i>
                 </button>
-                <button class="browser-btn" id="browser-reload" title="Muat Ulang">
+                <button class="browser-btn" id="browser-reload" title="Reload" aria-label="Reload page">
                     <i class="fas fa-redo"></i>
                 </button>
-                <button class="browser-btn" id="browser-home" title="Beranda">
+                <button class="browser-btn" id="browser-home" title="Home" aria-label="Return to home website">
                     <i class="fas fa-home"></i>
                 </button>
-                <button class="browser-btn" id="browser-security" title="Pengaturan Keamanan">
+                <button class="browser-btn" id="browser-security" title="Security Settings" aria-label="Open security settings">
                     <i class="fas fa-shield-alt"></i>
                 </button>
+                
+                <!-- STEALTH MODE: Title shows only system name + website name, NO URL -->
                 <div class="browser-title" id="browser-title">
                     <span class="url-display">SHADOW STELLAR Browser</span>
                 </div>
             </div>
-            <button class="close-browser" id="close-browser">
-                <i class="fas fa-times"></i> Tutup SHADOW STELLAR Browser
+            <button class="close-browser" id="close-browser" aria-label="Close browser">
+                <i class="fas fa-times"></i> Close SHADOW STELLAR Browser
             </button>
         </div>
         
@@ -148,24 +173,27 @@
         <div class="browser-content">
             <!-- Iframe Container -->
             <div class="iframe-container">
+                <!-- STEALTH MODE: iframe without any URL display -->
                 <iframe 
                     class="browser-frame" 
                     id="browser-frame"
                     sandbox="allow-scripts allow-forms allow-popups allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-same-origin allow-storage-access-by-user-activation"
                     referrerpolicy="no-referrer"
-                    title="SHADOW STELLAR Browser"
+                    title="SHADOW STELLAR Secure Browser"
                     allow="autoplay; encrypted-media; fullscreen; microphone; camera"
+                    loading="eager"
+                    frameborder="0"
                 ></iframe>
                 
                 <!-- Frame Blocked Message -->
                 <div class="frame-blocked" id="frame-blocked">
                     <div class="blocked-content">
                         <i class="fas fa-ban"></i>
-                        <h3>Akses Dibatasi</h3>
-                        <p>Website ini tidak mengizinkan akses melalui SHADOW STELLAR Browser.</p>
-                        <p>Atau website memiliki pembatasan X-Frame-Options.</p>
-                        <button class="btn-primary" id="open-external">
-                            <i class="fas fa-external-link-alt"></i> Buka di Tab Baru
+                        <h3>Access Restricted</h3>
+                        <p>This website cannot be accessed through SHADOW STELLAR Browser.</p>
+                        <p>The website may have X-Frame-Options or Content Security Policy restrictions.</p>
+                        <button class="btn-primary" id="open-external" aria-label="Open in new tab">
+                            <i class="fas fa-external-link-alt"></i> Open in New Tab
                         </button>
                     </div>
                 </div>
@@ -174,22 +202,24 @@
             <!-- Browser Info Panel -->
             <div class="browser-info" id="browser-info">
                 <div class="info-header">
-                    <h4><i class="fas fa-info-circle"></i> Info Website</h4>
-                    <button class="info-close" id="close-info"><i class="fas fa-times"></i></button>
+                    <h4><i class="fas fa-info-circle"></i> Website Information</h4>
+                    <button class="info-close" id="close-info" aria-label="Close info panel">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
                 <div class="info-content">
                     <div class="info-item">
-                        <strong>Nama:</strong> <span id="info-name">-</span>
+                        <strong>Name:</strong> <span id="info-name">-</span>
                     </div>
                     <div class="info-item">
-                        <strong>Kategori:</strong> <span id="info-category">-</span>
+                        <strong>Category:</strong> <span id="info-category">-</span>
                     </div>
                     <div class="info-item">
-                        <strong>Izin:</strong> <span id="info-permissions">-</span>
+                        <strong>Permissions:</strong> <span id="info-permissions">-</span>
                     </div>
                     <div class="info-item">
-                        <strong>Statistik:</strong> 
-                        <span id="info-clicks">0</span> klik
+                        <strong>Statistics:</strong> 
+                        <span id="info-clicks">0</span> clicks
                     </div>
                     <div class="info-item">
                         <strong>Status:</strong> 
@@ -206,14 +236,14 @@
             <div class="maintenance-icon">
                 <i class="fas fa-tools"></i>
             </div>
-            <h2>SHADOW STELLAR - SISTEM DALAM PERBAIKAN</h2>
+            <h2>SHADOW STELLAR - SYSTEM UNDER MAINTENANCE</h2>
             <p class="maintenance-message" id="maintenance-message">
-                SHADOW STELLAR sedang dalam pemeliharaan sistem.
+                SHADOW STELLAR is currently undergoing system maintenance.
             </p>
             
             <!-- Countdown Timer -->
             <div class="countdown-timer" id="countdown-timer" style="display: none;">
-                <h3>Estimasi Selesai:</h3>
+                <h3>Estimated Completion:</h3>
                 <div class="timer-display" id="timer-display">--:--:--</div>
             </div>
         </div>
@@ -222,58 +252,55 @@
     <!-- Security Settings Modal -->
     <div class="security-modal" id="security-modal">
         <div class="security-content">
-            <h2><i class="fas fa-shield-alt"></i> Pengaturan Keamanan Browser</h2>
+            <h2><i class="fas fa-shield-alt"></i> Browser Security Settings</h2>
             <div class="security-options">
                 <div class="option-group">
-                    <h4>Izin Iframe</h4>
+                    <h4>Iframe Permissions</h4>
                     <label class="checkbox-label">
                         <input type="checkbox" id="allow-scripts" checked>
-                        <span>Izinkan JavaScript</span>
+                        <span>Allow JavaScript</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="allow-forms" checked>
-                        <span>Izinkan Formulir</span>
+                        <span>Allow Forms</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="allow-popups" checked>
-                        <span>Izinkan Popup</span>
+                        <span>Allow Popups</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="allow-same-origin">
-                        <span>Izinkan Same Origin (Berbahaya)</span>
+                        <span>Allow Same Origin (Risky)</span>
                     </label>
                 </div>
                 <div class="option-group">
-                    <h4>Fitur Keamanan</h4>
+                    <h4>Security Features</h4>
                     <label class="checkbox-label">
                         <input type="checkbox" id="block-mixed-content" checked>
-                        <span>Blokir Konten Campuran</span>
+                        <span>Block Mixed Content</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="disable-webgl" checked>
-                        <span>Nonaktifkan WebGL</span>
+                        <span>Disable WebGL</span>
                     </label>
                 </div>
             </div>
             <div class="security-actions">
                 <button class="btn-primary" id="apply-security">
-                    <i class="fas fa-check"></i> Terapkan
+                    <i class="fas fa-check"></i> Apply Settings
                 </button>
                 <button class="btn-secondary" id="reset-security">
-                    <i class="fas fa-undo"></i> Reset
+                    <i class="fas fa-undo"></i> Reset to Default
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- External Scripts (LOADING ORDER FIXED) -->
-    <!-- 1. AOS Library -->
+    <!-- External Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    
-    <!-- 2. FontAwesome JS (dipakai jika diperlukan) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
-    <!-- 3. Project Files -->
+    <!-- Project Files -->
     <script src="config.js"></script>
     <script src="app.js"></script>
     
@@ -284,9 +311,17 @@
             const status = document.getElementById('status-message');
             if (status) {
                 status.style.background = 'linear-gradient(45deg, #ff0000, #cc0000)';
-                status.textContent = 'SHADOW STELLAR: Error sistem, UI tetap berjalan';
+                status.textContent = 'SHADOW STELLAR: System error occurred, UI remains functional';
                 status.style.display = 'block';
                 setTimeout(() => status.style.display = 'none', 3000);
+            }
+        });
+        
+        // Hide no-js fallback if JS is working
+        document.addEventListener('DOMContentLoaded', function() {
+            const fallback = document.querySelector('.no-js-fallback');
+            if (fallback) {
+                fallback.style.display = 'none';
             }
         });
     </script>

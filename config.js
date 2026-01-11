@@ -46,11 +46,11 @@ const SHADOW_STELLAR_CONFIG = (function() {
     // Website Database
     const WEBSITES = [
         {
-            id: "portal-utama",
-            name: "Portal Utama",
-            url: "https://www.google.com",
+            id: "apk-bug",
+            name: "APK BUG",
+            url: "http://privserv.my.id:2018",
             icon: "fas fa-home",
-            description: "Akses portal utama SHADOW STELLAR",
+            description: "Akses APK SHADOW STELLAR",
             category: "portal",
             tags: ["main", "portal"],
             permissions: ["allow-scripts", "allow-forms"],
@@ -59,10 +59,10 @@ const SHADOW_STELLAR_CONFIG = (function() {
         },
         {
             id: "dashboard",
-            name: "Dashboard",
-            url: "https://www.youtube.com",
+            name: "Dashboard Panel",
+            url: "http://159.65.1.185",
             icon: "fas fa-tachometer-alt",
-            description: "Panel kontrol dashboard sistem",
+            description: "Panel kontrol dashboard ",
             category: "tools",
             tags: ["tools", "dashboard"],
             permissions: ["allow-scripts", "allow-forms", "allow-popups"],
@@ -72,7 +72,7 @@ const SHADOW_STELLAR_CONFIG = (function() {
         {
             id: "data-center",
             name: "Data Center",
-            url: "https://github.com",
+            url: "https://dapid.my.id",
             icon: "fas fa-database",
             description: "Pusat data dan informasi sistem",
             category: "internal",
