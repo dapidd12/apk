@@ -1,137 +1,157 @@
+
 // SHADOW STELLAR - Configuration File
 // Semua konfigurasi awal disimpan di sini
 
 const SHADOW_STELLAR_CONFIG = (function() {
-    // Default websites database
-    const DEFAULT_WEBSITES = [
+    // Global System Configuration
+    const GLOBAL_CONFIG = {
+        // System Info
+        name: "SHADOW STELLAR",
+        tagline: "Silent. Secure. Stellar.",
+        version: "3.0",
+        lastUpdated: "2024-01-01",
+        
+        // Maintenance Settings
+        maintenance: false,
+        maintenanceMessage: "SHADOW STELLAR sedang dalam pemeliharaan sistem.",
+        maintenanceCountdown: null,
+        
+        // Announcement
+        announcement: {
+            enabled: false,
+            message: "",
+            type: "info" // info, warning, error, success
+        },
+        
+        // Theme Settings
+        theme: {
+            darkMode: true,
+            showDescriptions: true,
+            kioskMode: false
+        },
+        
+        // Security Settings
+        security: {
+            developerCode: "SHADOW123", // Default developer code
+            codeLength: 8,
+            maxLoginAttempts: 3,
+            lockoutTime: 10, // minutes
+            
+            // Browser Security
+            defaultSandbox: "allow-scripts allow-forms allow-popups",
+            blockMixedContent: true,
+            disableWebGL: true
+        },
+        
+        // Session Settings
+        session: {
+            timeout: 30, // minutes
+            idleTimeout: 15 // minutes
+        },
+        
+        // Feature Flags
+        features: {
+            maintenanceMode: true,
+            developerAccess: true,
+            kioskMode: true,
+            browserSecurity: true,
+            statistics: true,
+            exportImport: true
+        },
+        
+        // Statistics (Initial)
+        statistics: {
+            totalClicks: 0,
+            totalWebsites: 4,
+            activeAdmins: 0
+        }
+    };
+
+    // Website Database
+    const WEBSITES = [
         {
-            id: 1,
+            id: "portal-utama",
             name: "Portal Utama",
             url: "https://www.google.com",
             icon: "fas fa-home",
             description: "Akses portal utama SHADOW STELLAR",
             category: "portal",
+            tags: ["main", "portal"],
             permissions: ["allow-scripts", "allow-forms"],
             clickCount: 0,
+            isActive: true,
             maintenance: false,
-            maintenanceMessage: ""
+            maintenanceMessage: "",
+            createdAt: "2024-01-01"
         },
         {
-            id: 2,
+            id: "dashboard",
             name: "Dashboard",
             url: "https://www.youtube.com",
             icon: "fas fa-tachometer-alt",
             description: "Panel kontrol dashboard sistem",
             category: "tools",
+            tags: ["tools", "dashboard"],
             permissions: ["allow-scripts", "allow-forms", "allow-popups"],
             clickCount: 0,
+            isActive: true,
             maintenance: false,
-            maintenanceMessage: ""
+            maintenanceMessage: "",
+            createdAt: "2024-01-01"
         },
         {
-            id: 3,
+            id: "data-center",
             name: "Data Center",
             url: "https://github.com",
             icon: "fas fa-database",
             description: "Pusat data dan informasi sistem",
             category: "internal",
+            tags: ["internal", "data"],
             permissions: ["allow-scripts"],
             clickCount: 0,
+            isActive: true,
             maintenance: false,
-            maintenanceMessage: ""
+            maintenanceMessage: "",
+            createdAt: "2024-01-01"
         },
         {
-            id: 4,
+            id: "media-center",
             name: "Media Center",
             url: "https://vimeo.com",
             icon: "fas fa-photo-video",
             description: "Pusat media dan streaming",
             category: "media",
+            tags: ["media", "streaming"],
             permissions: ["allow-scripts", "allow-popups"],
             clickCount: 0,
+            isActive: true,
             maintenance: false,
-            maintenanceMessage: ""
+            maintenanceMessage: "",
+            createdAt: "2024-01-01"
         }
     ];
 
-    // Default admin accounts (passwords will be hashed)
-    const DEFAULT_ADMINS = [
+    // Admin Accounts (Read-only for display)
+    const ADMIN_ACCOUNTS = [
         {
             username: "admin",
-            passwordHash: "", // Will be set on first run
             role: "superadmin",
-            createdAt: new Date().toISOString(),
+            createdAt: "2024-01-01",
             lastLogin: null
         },
         {
             username: "supervisor",
-            passwordHash: "", // Will be set on first run
             role: "admin",
-            createdAt: new Date().toISOString(),
+            createdAt: "2024-01-01",
             lastLogin: null
         }
     ];
 
-    // Default system settings
-    const DEFAULT_SETTINGS = {
-        // System
-        systemName: "SHADOW STELLAR",
-        tagline: "Silent. Secure. Stellar.",
-        
-        // Security
-        developerCode: null, // Will be generated
-        codeLength: 6,
-        maxLoginAttempts: 3,
-        lockoutTime: 10, // minutes
-        
-        // Session
-        sessionTimeout: 30, // minutes
-        idleTimeout: 15, // minutes
-        rememberMeDays: 30,
-        
-        // Maintenance
-        globalMaintenance: false,
-        maintenanceMessage: "SHADOW STELLAR sedang dalam pemeliharaan sistem.",
-        maintenanceCountdown: null,
-        
-        // Browser
-        defaultSandbox: "allow-scripts allow-forms allow-popups",
-        blockMixedContent: true,
-        disableWebGL: true,
-        
-        // UI
-        darkMode: true,
-        showDescriptions: true,
-        kioskMode: false,
-        
-        // Statistics
-        totalClicks: 0,
-        lastReset: new Date().toISOString()
-    };
-
-    // Maintenance access log structure
-    const DEFAULT_ACCESS_LOG = [];
-
-    // Statistics data structure
-    const DEFAULT_STATS = {
-        dailyClicks: {},
-        websiteStats: {},
-        adminActivity: {}
-    };
-
-    // Supabase Configuration (GANTI DENGAN KONFIGURASI ANDA)
-    const SUPABASE_CONFIG = {
-        url: "https://mivweeseoqutfcfcxepf.supabase.co",
-        anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pdndlZXNlb3F1dGZjZmN4ZXBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxMTE3NjYsImV4cCI6MjA4MzY4Nzc2Nn0.JsjFC9-Ry-jb427TWLn4xGTRaFN6TEG8GTn1eEZjwUE"
-    };
-
     // Export configuration
     return {
-        DEFAULT_WEBSITES,
-        DEFAULT_ADMINS,
-        DEFAULT_SETTINGS,
-        DEFAULT_ACCESS_LOG,
-        DEFAULT_STATS,
-        SUPABASE_CONFIG
+        GLOBAL_CONFIG,
+        WEBSITES,
+        ADMIN_ACCOUNTS
     };
 })();
+[file content end]

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -26,12 +27,6 @@
     
     <!-- Status Message -->
     <div class="status-message" id="status-message"></div>
-    
-    <!-- Session Info Badge -->
-    <div class="session-badge" id="session-badge" style="display: none;">
-        <span id="session-username"></span>
-        <button id="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
-    </div>
     
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loading-overlay">
@@ -110,11 +105,6 @@
         </div>
     </div>
     
-    <!-- Admin Button -->
-    <button class="admin-corner-btn" id="admin-btn" title="Admin Panel">
-        <i class="fas fa-cog"></i>
-    </button>
-    
     <!-- Internal Browser -->
     <div class="browser-container" id="browser-container">
         <div class="browser-header">
@@ -150,9 +140,10 @@
                 <iframe 
                     class="browser-frame" 
                     id="browser-frame"
-                    sandbox="allow-scripts allow-forms allow-popups"
+                    sandbox="allow-scripts allow-forms allow-popups allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-same-origin allow-storage-access-by-user-activation"
                     referrerpolicy="no-referrer"
                     title="SHADOW STELLAR Browser"
+                    allow="autoplay; encrypted-media; fullscreen; microphone; camera"
                 ></iframe>
                 
                 <!-- Frame Blocked Message -->
@@ -241,131 +232,6 @@
         </div>
     </div>
     
-    <!-- Login Modal -->
-    <div class="login-modal" id="login-modal">
-        <div class="login-content">
-            <div class="login-header">
-                <h2><i class="fas fa-user-shield"></i> SHADOW STELLAR ADMIN LOGIN</h2>
-                <p>Silent. Secure. Stellar.</p>
-            </div>
-            <div class="login-body">
-                <form class="login-form" id="login-form">
-                    <div class="form-group">
-                        <label for="username"><i class="fas fa-user"></i> Username</label>
-                        <input type="text" 
-                               id="login-username" 
-                               placeholder="Masukkan username"
-                               autocomplete="username"
-                               required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password"><i class="fas fa-lock"></i> Password</label>
-                        <input type="password" 
-                               id="login-password" 
-                               placeholder="Masukkan password"
-                               autocomplete="current-password"
-                               required>
-                    </div>
-                    <div class="form-options">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="remember-me">
-                            <span>Ingat saya (30 hari)</span>
-                        </label>
-                    </div>
-                    <button type="submit" class="login-btn" id="login-submit">
-                        <i class="fas fa-sign-in-alt"></i> MASUK KE SHADOW STELLAR
-                    </button>
-                    <div class="login-footer">
-                        <p id="login-delay-info"></p>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Admin Panel Modal -->
-    <div class="admin-modal" id="admin-modal">
-        <div class="admin-panel">
-            <div class="admin-header">
-                <h2><i class="fas fa-user-shield"></i> SHADOW STELLAR ADMIN PANEL</h2>
-                <div class="admin-user-info">
-                    <span id="current-admin"></span>
-                    <button class="close-admin" id="close-admin">&times;</button>
-                </div>
-            </div>
-            
-            <div class="admin-body">
-                <div class="admin-tabs">
-                    <button class="tab-btn active" data-tab="websites">
-                        <i class="fas fa-globe"></i> Website
-                    </button>
-                    <button class="tab-btn" data-tab="maintenance">
-                        <i class="fas fa-tools"></i> Maintenance
-                    </button>
-                    <button class="tab-btn" data-tab="accounts">
-                        <i class="fas fa-users"></i> Akun Admin
-                    </button>
-                    <button class="tab-btn" data-tab="settings">
-                        <i class="fas fa-cogs"></i> Pengaturan
-                    </button>
-                    <button class="tab-btn" data-tab="stats">
-                        <i class="fas fa-chart-bar"></i> Statistik
-                    </button>
-                    <button class="tab-btn" data-tab="security">
-                        <i class="fas fa-shield-alt"></i> Keamanan
-                    </button>
-                </div>
-                
-                <!-- Tab Content akan diisi oleh JavaScript -->
-                <div id="tab-content-container"></div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Developer Access Modal -->
-    <div class="developer-modal" id="developer-modal">
-        <div class="developer-content">
-            <h2><i class="fas fa-code"></i> SHADOW STELLAR - KODE AKSES DEVELOPER</h2>
-            <div class="secret-code" id="current-dev-code">MEMUAT...</div>
-            <p><i class="fas fa-exclamation-triangle"></i> Simpan kode ini di tempat aman!</p>
-            <div class="developer-actions">
-                <button class="btn-primary" id="copy-dev-code">
-                    <i class="fas fa-copy"></i> Salin Kode
-                </button>
-                <button class="btn-primary" id="close-developer-modal">
-                    <i class="fas fa-times"></i> TUTUP
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Import Config Modal -->
-    <div class="import-modal" id="import-modal">
-        <div class="import-content">
-            <h2><i class="fas fa-file-import"></i> Impor Konfigurasi SHADOW STELLAR</h2>
-            <div class="import-options">
-                <textarea id="import-json" placeholder="Tempel konfigurasi JSON di sini..."></textarea>
-                <input type="file" id="import-file" accept=".json" style="display: none;">
-                <button class="btn-secondary" id="browse-file">
-                    <i class="fas fa-folder-open"></i> Pilih File
-                </button>
-                <p class="file-info" id="file-info"></p>
-            </div>
-            <div class="import-actions">
-                <button class="btn-primary" id="confirm-import">
-                    <i class="fas fa-check"></i> Impor Konfigurasi
-                </button>
-                <button class="btn-secondary" id="cancel-import">
-                    <i class="fas fa-times"></i> Batal
-                </button>
-            </div>
-            <div class="import-warning">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Impor konfigurasi akan mengganti semua data saat ini!</p>
-            </div>
-        </div>
-    </div>
-    
     <!-- Security Settings Modal -->
     <div class="security-modal" id="security-modal">
         <div class="security-content">
@@ -415,12 +281,6 @@
 
     <!-- External Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    
-     <!-- Supabase Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- Supabase Migration Helper -->
-    <script src="supabase.js"></script>
 
     <!-- Project Files -->
     <script src="config.js"></script>
@@ -430,3 +290,4 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </body>
 </html>
+[file content end]
