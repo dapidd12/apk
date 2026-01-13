@@ -1,329 +1,581 @@
 <!DOCTYPE html>
-<html lang="id" class="no-js">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SHADOW STELLAR - Secure Internal Web Gateway">
-    <meta name="theme-color" content="#800080">
+    <title>Galeri Meme Interaktif</title>
     
-    <title>SHADOW STELLAR | Secure Internal Web Gateway</title>
+    <!-- AOS CSS CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
     
-    <!-- FontAwesome -->
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- AOS Library -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
-    
-    <!-- No-JS Fallback Script -->
-    <script>
-        // Remove no-js class if JS is enabled
-        document.documentElement.classList.remove('no-js');
-        document.documentElement.classList.add('js-enabled');
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+        }
         
-        // CSS Load Check
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                const bodyColor = window.getComputedStyle(document.body).backgroundColor;
-                if (bodyColor === 'rgb(0, 0, 0)' || bodyColor === 'transparent') {
-                    console.warn('SHADOW STELLAR: CSS mungkin tidak terload dengan benar');
-                    // Apply fallback gradient
-                    document.body.style.background = 'linear-gradient(135deg, #000, #1a001a, #330033)';
-                }
-                
-                // Video fallback check
-                const video = document.getElementById('video-bg');
-                if (video && (video.readyState < 2 || video.error)) {
-                    document.documentElement.classList.add('no-video');
-                }
-            }, 500);
-        });
-    </script>
+        body {
+            overflow-x: hidden;
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        /* Background Video dengan Overlay */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+        
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: -1;
+        }
+        
+        /* Header */
+        header {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, rgba(255, 105, 180, 0.2), rgba(0, 255, 255, 0.2));
+            backdrop-filter: blur(10px);
+            border-bottom: 3px dashed #ff69b4;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            color: #ffcc00;
+            text-shadow: 3px 3px 0 #ff1493, 6px 6px 0 #00ffff;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #fff;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Popup Welcome */
+        .welcome-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        
+        .popup-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .welcome-card {
+            background: linear-gradient(145deg, #ff00cc, #00ccff);
+            border-radius: 25px;
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 15px 35px rgba(255, 20, 147, 0.4),
+                        0 0 50px rgba(0, 255, 255, 0.3);
+            position: relative;
+            border: 5px solid #ffcc00;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #ff4757;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            border: 3px solid white;
+        }
+        
+        .close-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            background: #ff3838;
+        }
+        
+        .welcome-title {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 1rem;
+            text-align: center;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .welcome-text {
+            color: #fff;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .meme-tip {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 15px;
+            font-style: italic;
+            margin-top: 1.5rem;
+            border-left: 5px solid #ffcc00;
+        }
+        
+        /* Galeri Grid */
+        .gallery-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem 3rem;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .meme-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 3px solid transparent;
+            backdrop-filter: blur(5px);
+        }
+        
+        .meme-item:hover {
+            transform: translateY(-10px) rotate(2deg);
+            box-shadow: 0 15px 30px rgba(255, 105, 180, 0.5),
+                        0 0 30px rgba(0, 255, 255, 0.3);
+            border-color: #ff69b4;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .meme-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+            background-color: #222;
+        }
+        
+        .meme-item:hover .meme-img {
+            transform: scale(1.05);
+        }
+        
+        /* Lightbox Modal */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(255, 20, 147, 0.7);
+        }
+        
+        .lightbox-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .close-lightbox {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+        
+        .close-lightbox:hover {
+            transform: scale(1.2) rotate(90deg);
+            color: #ffcc00;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.7);
+            border-top: 3px dashed #00ffff;
+            margin-top: 2rem;
+        }
+        
+        .audio-info {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 1rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .welcome-card {
+                padding: 1.5rem;
+            }
+            
+            .welcome-title {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Video Background -->
-    <video autoplay muted loop id="video-bg" preload="auto" playsinline>
-        <source src="assets/background.mp4" type="video/mp4">
-        <source src="assets/background.webm" type="video/webm">
-        Your browser does not support the video tag.
-    </video>
-    
-    <!-- Overlay Gradient -->
+    <!-- Background Video -->
+    <div class="video-background">
+        <video autoplay loop muted playsinline>
+            <!-- Link video background dari Catbox -->
+            <source src="https://o.uguu.se/amVvjTcF.mp4" type="video/mp4">
+        </video>
+    </div>
     <div class="overlay"></div>
     
-    <!-- Status Message -->
-    <div class="status-message" id="status-message"></div>
+    <!-- Audio Background (tersembunyi, auto play setelah klik popup) -->
+    <audio id="background-audio" loop>
+        <!-- Link audio background dari Catbox -->
+        <source src="https://files.catbox.moe/h6ymym.mp3" type="audio/mpeg">
+    </audio>
     
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="spinner"></div>
-        <p>SHADOW STELLAR - Initializing Secure Gateway...</p>
-    </div>
-    
-    <!-- Main Container -->
-    <div class="main-container" id="main-container">
-        <!-- Header Minimal -->
-        <div class="main-header">
-            <h1>SHADOW STELLAR</h1>
-            
-            <!-- Settings Button -->
-            <div class="settings-container">
-                <button class="settings-btn" id="settings-btn" title="System Settings" aria-label="Open Settings">
-                    <i class="fas fa-cog"></i>
-                </button>
-                
-                <!-- Settings Menu -->
-                <div class="settings-menu" id="settings-menu">
-                    <div class="menu-item" id="toggle-descriptions">
-                        <i class="fas fa-align-left"></i>
-                        <span>Show Descriptions</span>
-                        <div class="toggle-switch" aria-label="Toggle descriptions">
-                            <div class="toggle-slider"></div>
-                        </div>
-                    </div>
-                    <div class="menu-item" id="toggle-mode">
-                        <i class="fas fa-moon"></i>
-                        <span>Dark Mode</span>
-                        <div class="toggle-switch" aria-label="Toggle dark mode">
-                            <div class="toggle-slider"></div>
-                        </div>
-                    </div>
-                    <div class="menu-divider"></div>
-                    <div class="menu-item" id="export-config">
-                        <i class="fas fa-download"></i>
-                        <span>Export Configuration</span>
-                    </div>
-                    <div class="menu-item" id="import-config">
-                        <i class="fas fa-upload"></i>
-                        <span>Import Configuration</span>
-                    </div>
-                    <div class="menu-divider"></div>
-                    <div class="menu-item" id="kiosk-mode">
-                        <i class="fas fa-tv"></i>
-                        <span>Kiosk Mode</span>
-                        <div class="toggle-switch" aria-label="Toggle kiosk mode">
-                            <div class="toggle-slider"></div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Popup Welcome -->
+    <div class="welcome-popup" id="welcomePopup">
+        <div class="welcome-card" data-aos="zoom-in">
+            <div class="close-btn" id="closePopup">
+                <i class="fas fa-times"></i>
             </div>
-        </div>
-        
-        <!-- Horizontal Button List -->
-        <div class="horizontal-buttons" id="horizontal-buttons">
-            <!-- Fallback message if JS fails -->
-            <div class="no-js-fallback" style="text-align: center; padding: 40px; color: #ccc; display: none;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px;"></i>
-                <h3>JavaScript Required</h3>
-                <p>SHADOW STELLAR requires JavaScript to function properly.</p>
-                <p>Please enable JavaScript and refresh the page.</p>
-            </div>
-            <!-- Website buttons will be generated by JavaScript -->
-        </div>
-        
-        <!-- Statistics Display -->
-        <div class="stats-container" id="stats-container">
-            <div class="stat-item">
-                <i class="fas fa-globe"></i>
-                <span id="total-websites">0</span> Websites
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-mouse-pointer"></i>
-                <span id="total-clicks">0</span> Total Clicks
-            </div>
-        </div>
-    </div>
-    
-    <!-- Internal Browser (STEALTH MODE) -->
-    <div class="browser-container" id="browser-container">
-        <div class="browser-header">
-            <div class="browser-controls">
-                <button class="browser-btn" id="browser-back" title="Back" aria-label="Navigate back">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <button class="browser-btn" id="browser-forward" title="Forward" aria-label="Navigate forward">
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-                <button class="browser-btn" id="browser-reload" title="Reload" aria-label="Reload page">
-                    <i class="fas fa-redo"></i>
-                </button>
-                <button class="browser-btn" id="browser-home" title="Home" aria-label="Return to home website">
-                    <i class="fas fa-home"></i>
-                </button>
-                <button class="browser-btn" id="browser-security" title="Security Settings" aria-label="Open security settings">
-                    <i class="fas fa-shield-alt"></i>
-                </button>
-                
-                <!-- STEALTH MODE: Title shows only system name + website name, NO URL -->
-                <div class="browser-title" id="browser-title">
-                    <span class="url-display">SHADOW STELLAR Browser</span>
-                </div>
-            </div>
-            <button class="close-browser" id="close-browser" aria-label="Close browser">
-                <i class="fas fa-times"></i> Close SHADOW STELLAR Browser
-            </button>
-        </div>
-        
-        <!-- Browser Content Area -->
-        <div class="browser-content">
-            <!-- Iframe Container -->
-            <div class="iframe-container">
-                <!-- STEALTH MODE: iframe without any URL display -->
-                <iframe 
-                    class="browser-frame" 
-                    id="browser-frame"
-                    sandbox="allow-scripts allow-forms allow-popups allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-same-origin allow-storage-access-by-user-activation"
-                    referrerpolicy="no-referrer"
-                    title="SHADOW STELLAR Secure Browser"
-                    allow="autoplay; encrypted-media; fullscreen; microphone; camera"
-                    loading="eager"
-                    frameborder="0"
-                ></iframe>
-                
-                <!-- Frame Blocked Message -->
-                <div class="frame-blocked" id="frame-blocked">
-                    <div class="blocked-content">
-                        <i class="fas fa-ban"></i>
-                        <h3>Access Restricted</h3>
-                        <p>This website cannot be accessed through SHADOW STELLAR Browser.</p>
-                        <p>The website may have X-Frame-Options or Content Security Policy restrictions.</p>
-                        <button class="btn-primary" id="open-external" aria-label="Open in new tab">
-                            <i class="fas fa-external-link-alt"></i> Open in New Tab
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Browser Info Panel -->
-            <div class="browser-info" id="browser-info">
-                <div class="info-header">
-                    <h4><i class="fas fa-info-circle"></i> Website Information</h4>
-                    <button class="info-close" id="close-info" aria-label="Close info panel">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="info-content">
-                    <div class="info-item">
-                        <strong>Name:</strong> <span id="info-name">-</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>Category:</strong> <span id="info-category">-</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>Permissions:</strong> <span id="info-permissions">-</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>Statistics:</strong> 
-                        <span id="info-clicks">0</span> clicks
-                    </div>
-                    <div class="info-item">
-                        <strong>Status:</strong> 
-                        <span class="status-indicator" id="info-status"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Maintenance Mode -->
-    <div class="maintenance-mode" id="maintenance-mode">
-        <div class="maintenance-content">
-            <div class="maintenance-icon">
-                <i class="fas fa-tools"></i>
-            </div>
-            <h2>SHADOW STELLAR - SYSTEM UNDER MAINTENANCE</h2>
-            <p class="maintenance-message" id="maintenance-message">
-                SHADOW STELLAR is currently undergoing system maintenance.
+            <h2 class="welcome-title">WELCOME TO MEME GALERY</h2>
+            <p class="welcome-text">
+                Ini adalah tempat dimana internet berkumpul menjadi satu. 
+                Siapkan mata dan telinga Anda untuk pengalaman visual yang... aneh.
             </p>
-            
-            <!-- Countdown Timer -->
-            <div class="countdown-timer" id="countdown-timer" style="display: none;">
-                <h3>Estimated Completion:</h3>
-                <div class="timer-display" id="timer-display">--:--:--</div>
+            <div class="meme-tip">
+                <i class="fas fa-lightbulb"></i> Klik X untuk mulai dan musik akan menyala. 
+                Klik meme untuk melihat lebih besar. Jangan lupa tarik napas.
             </div>
         </div>
     </div>
     
-    <!-- Security Settings Modal -->
-    <div class="security-modal" id="security-modal">
-        <div class="security-content">
-            <h2><i class="fas fa-shield-alt"></i> Browser Security Settings</h2>
-            <div class="security-options">
-                <div class="option-group">
-                    <h4>Iframe Permissions</h4>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="allow-scripts" checked>
-                        <span>Allow JavaScript</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="allow-forms" checked>
-                        <span>Allow Forms</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="allow-popups" checked>
-                        <span>Allow Popups</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="allow-same-origin">
-                        <span>Allow Same Origin (Risky)</span>
-                    </label>
-                </div>
-                <div class="option-group">
-                    <h4>Security Features</h4>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="block-mixed-content" checked>
-                        <span>Block Mixed Content</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="disable-webgl" checked>
-                        <span>Disable WebGL</span>
-                    </label>
-                </div>
-            </div>
-            <div class="security-actions">
-                <button class="btn-primary" id="apply-security">
-                    <i class="fas fa-check"></i> Apply Settings
-                </button>
-                <button class="btn-secondary" id="reset-security">
-                    <i class="fas fa-undo"></i> Reset to Default
-                </button>
-            </div>
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <div class="close-lightbox" id="closeLightbox">
+            <i class="fas fa-times"></i>
+        </div>
+        <div class="lightbox-content">
+            <img class="lightbox-img" id="lightboxImg" src="" alt="Meme">
         </div>
     </div>
-
-    <!-- External Scripts -->
+    
+    <!-- Konten Utama -->
+    <header>
+        <h1 data-aos="fade-down">GALERI MEME ABSURD</h1>
+        <p class="subtitle" data-aos="fade-up" data-aos-delay="200">
+            Koleksi 20 meme terpilih untuk menyelamatkan hari-hari biasa menjadi luar biasa. 
+            Semua murni dari internet, kami hanya kurator.
+        </p>
+    </header>
+    
+    <main class="gallery-container">
+        <div class="gallery-grid" id="galleryGrid">
+            <!-- Galeri akan diisi oleh JavaScript -->
+        </div>
+    </main>
+    
+    <footer>
+        <p>© 2026 Galeri Meme Interaktif - Dibuat dengan cinta dan sedikit kegilaan</p>
+        <p class="audio-info">Musik akan otomatis diputar setelah Anda menutup popup welcome</p>
+    </footer>
+    
+    <!-- AOS JS CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-
-    <!-- Project Files -->
-    <script src="config.js"></script>
-    <script src="app.js"></script>
     
-    <!-- Global Error Handler -->
     <script>
-        window.addEventListener('error', function(e) {
-            console.error('SHADOW STELLAR Error:', e.error);
-            const status = document.getElementById('status-message');
-            if (status) {
-                status.style.background = 'linear-gradient(45deg, #ff0000, #cc0000)';
-                status.textContent = 'SHADOW STELLAR: System error occurred, UI remains functional';
-                status.style.display = 'block';
-                setTimeout(() => status.style.display = 'none', 3000);
+        // Inisialisasi AOS
+        AOS.init({
+            duration: 800,
+            once: false,
+            offset: 100,
+            easing: 'ease-out-cubic'
+        });
+        
+        // Placeholder gambar 1px transparan (base64 GIF)
+        const PLACEHOLDER_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        
+        // Array link Catbox untuk 20 meme images (semua link valid)
+        const memeImages = [
+            "https://files.catbox.moe/datgom.jpg",
+            "https://files.catbox.moe/aug42t.jpg",
+            "https://files.catbox.moe/81b75e.jpg",
+            "https://files.catbox.moe/hpjdl9.jpg",
+            "https://files.catbox.moe/zvihma.jpg",
+            "https://files.catbox.moe/gedt9m.jpg",
+            "https://files.catbox.moe/jn2r8w.jpg",
+            "https://files.catbox.moe/5k8h3d.jpg",
+            "https://files.catbox.moe/n53bqh.jpg",
+            "https://files.catbox.moe/7wvwpp.jpg",
+            "https://files.catbox.moe/p0qoiq.jpg",
+            "https://files.catbox.moe/d6u2qf.jpg",
+            "https://files.catbox.moe/r7t9x1.jpg",
+            "https://files.catbox.moe/4m5n6p.jpg",
+            "https://files.catbox.moe/q2w3e4.jpg",
+            "https://files.catbox.moe/l0k9j8.jpg",
+            "https://files.catbox.moe/vwx012.jpg",
+            "https://files.catbox.moe/yz3456.jpg",
+            "https://files.catbox.moe/789def.jpg",
+            "https://files.catbox.moe/abc123.jpg"
+        ];
+        
+        // Fallback images jika link Catbox gagal (picsum)
+        const fallbackImages = [
+            "https://picsum.photos/400/300?random=1&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=2&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=3&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=4&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=5&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=6&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=7&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=8&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=9&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=10&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=11&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=12&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=13&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=14&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=15&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=16&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=17&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=18&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=19&grayscale&blur=2",
+            "https://picsum.photos/400/300?random=20&grayscale&blur=2"
+        ];
+        
+        // DOM Elements
+        const welcomePopup = document.getElementById('welcomePopup');
+        const closePopupBtn = document.getElementById('closePopup');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const closeLightboxBtn = document.getElementById('closeLightbox');
+        const backgroundAudio = document.getElementById('background-audio');
+        
+        // Fungsi untuk menutup popup welcome
+        function closeWelcomePopup() {
+            welcomePopup.classList.add('popup-hidden');
+            
+            // Play audio setelah user klik (user-triggered)
+            setTimeout(() => {
+                backgroundAudio.play().catch(e => {
+                    console.log("Autoplay prevented, but that's okay:", e);
+                });
+            }, 300);
+            
+            // Hapus popup dari DOM setelah animasi selesai
+            setTimeout(() => {
+                welcomePopup.style.display = 'none';
+            }, 500);
+        }
+        
+        // Event listener untuk tombol close popup
+        closePopupBtn.addEventListener('click', closeWelcomePopup);
+        
+        // Juga tutup popup jika klik di luar card
+        welcomePopup.addEventListener('click', function(e) {
+            if (e.target === welcomePopup) {
+                closeWelcomePopup();
             }
         });
         
-        // Hide no-js fallback if JS is working
-        document.addEventListener('DOMContentLoaded', function() {
-            const fallback = document.querySelector('.no-js-fallback');
-            if (fallback) {
-                fallback.style.display = 'none';
+        // Fungsi untuk membuka lightbox
+        function openLightbox(imgSrc) {
+            lightboxImg.src = imgSrc;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+        
+        // Fungsi untuk menutup lightbox
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        }
+        
+        // Event listener untuk lightbox
+        closeLightboxBtn.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox) {
+                closeLightbox();
             }
         });
+        
+        // Intersection Observer untuk lazy loading
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const originalSrc = img.dataset.src;
+                    
+                    // Coba load gambar asli
+                    img.src = originalSrc;
+                    
+                    // Set handler jika gambar gagal load
+                    img.onerror = function() {
+                        // Ganti dengan fallback image
+                        const index = parseInt(img.dataset.index);
+                        this.src = fallbackImages[index] || fallbackImages[0];
+                    };
+                    
+                    img.onload = function() {
+                        img.classList.add('loaded');
+                    };
+                    
+                    observer.unobserve(img);
+                }
+            });
+        }, {
+            rootMargin: '100px',
+            threshold: 0.1
+        });
+        
+        // Fungsi untuk membuat galeri
+        function createGallery() {
+            memeImages.forEach((imgUrl, index) => {
+                const memeItem = document.createElement('div');
+                memeItem.className = 'meme-item';
+                memeItem.setAttribute('data-aos', 'fade-up');
+                memeItem.setAttribute('data-aos-delay', (index % 10) * 100);
+                
+                const img = document.createElement('img');
+                img.className = 'meme-img';
+                img.alt = `Meme ${index + 1}`;
+                img.loading = 'lazy';
+                
+                // Set placeholder 1px transparan (WAJIB)
+                img.src = PLACEHOLDER_IMAGE;
+                
+                // Simpan link asli di data-src untuk lazy loading
+                img.dataset.src = imgUrl;
+                img.dataset.index = index; // Untuk fallback mapping
+                
+                // Event listener untuk klik gambar
+                img.addEventListener('click', () => {
+                    // Gunakan gambar yang sudah di-load jika ada
+                    const currentSrc = (img.src !== PLACEHOLDER_IMAGE) ? img.src : img.dataset.src;
+                    openLightbox(currentSrc);
+                });
+                
+                memeItem.appendChild(img);
+                galleryGrid.appendChild(memeItem);
+                
+                // Observasi gambar untuk lazy loading
+                imageObserver.observe(img);
+            });
+        }
+        
+        // Inisialisasi galeri saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', createGallery);
+        
+        // Tambahkan event listener untuk escape key untuk menutup lightbox
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+        
+        // Fallback untuk audio autoplay policy
+        document.addEventListener('click', function initAudio() {
+            // Hanya trigger sekali
+            document.removeEventListener('click', initAudio);
+            
+            // Coba play audio jika popup sudah ditutup
+            if (welcomePopup.classList.contains('popup-hidden')) {
+                backgroundAudio.play().catch(e => {
+                    console.log("Audio autoplay gagal, perlu interaksi user langsung");
+                });
+            }
+        });
+        
+        // Handle gambar yang gagal load di lightbox
+        lightboxImg.onerror = function() {
+            // Ganti dengan placeholder jika gambar lightbox gagal
+            this.src = 'https://picsum.photos/800/600?random=999&grayscale';
+        };
     </script>
 </body>
 </html>
